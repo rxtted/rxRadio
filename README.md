@@ -26,9 +26,10 @@ Add these resources before `rxRadio`:
 
 ## Installation
 
-1. Place the resource in your server resources folder as `rxRadio`.
-2. Ensure dependencies start before it.
-3. Add `ensure rxRadio` to your server config.
+1. Download a release.
+2. Place the resource in your server resources folder as `rxRadio`.
+3. Ensure dependencies start before it.
+4. Add `ensure rxRadio` to your server config.
 
 Example:
 
