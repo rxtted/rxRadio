@@ -14,8 +14,8 @@ end
 
 local function addServerIdToPlayerName(serverId, playerName)
     if Config.ShowPlayersServerIdNextToTheirName then
-        if Config.PlayerServerIdPosition == "left" then playerName = ("%s) %s"):format(serverId, playerName)
-        elseif Config.PlayerServerIdPosition == "right" then playerName = ("%s (%s"):format(playerName, serverId) end
+        if Config.PlayerServerIdPosition == "left" then playerName = ("(%s) %s"):format(serverId, playerName)
+        elseif Config.PlayerServerIdPosition == "right" then playerName = ("%s (%s)"):format(playerName, serverId) end
     end
     return playerName
 end
@@ -24,7 +24,13 @@ local function addPlayerToTheRadioList(playerId, playerName)
     if playersInRadio[playerId] then return end
     playersInRadio[playerId] = temporaryName
     playersInRadio[playerId] = addServerIdToPlayerName(playerId, playerName or Player(playerId).state[Shared.State.nameInRadio] or callback.await(Shared.Callback.getPlayerName, false, playerId))
-    SendNUIMessage({ self = playerId == playerServerID, radioId = playerId, radioName = playersInRadio[playerId], channel = currentRadioChannelName })
+    SendNUIMessage({
+        self = playerId == playerServerID,
+        radioId = playerId,
+        radioName = playersInRadio[playerId],
+        channel = currentRadioChannelName,
+        channelFrequency = currentRadioChannel
+    })
 end
 
 local function removePlayerFromTheRadioList(playerId)
@@ -86,6 +92,38 @@ end
 if Config.LetPlayersSetTheirOwnNameInRadio then
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListChangeNameCommand, "Customize your name to be shown in radio list", { { name = "customized name", help = "Enter your desired name to be shown in radio list" } })
 end
+
+RegisterCommand("ch", function(_, args)
+    local channel = tonumber(args[1])
+    if not args[1] then
+        return TriggerEvent("chat:addMessage", {
+            color = { 255, 200, 0 },
+            args = { "rxRadio", "Usage: /ch [channel] or /ch 0 to leave radio" }
+        })
+    end
+
+    if not channel then
+        return TriggerEvent("chat:addMessage", {
+            color = { 255, 80, 80 },
+            args = { "rxRadio", "Channel must be a number" }
+        })
+    end
+
+    channel = math.floor(channel)
+
+    if channel < 0 then
+        return TriggerEvent("chat:addMessage", {
+            color = { 255, 80, 80 },
+            args = { "rxRadio", "Channel must be 0 or higher" }
+        })
+    end
+
+    exports["pma-voice"]:setRadioChannel(channel)
+end, false)
+
+TriggerEvent("chat:addSuggestion", "/ch", "Join or leave a PMA voice radio channel", {
+    { name = "channel-frequency", help = "Use 0 to leave radio" }
+})
 
 if Config.HideRadioListVisibilityByDefault then
     SetTimeout(1000, function()

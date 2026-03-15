@@ -3,10 +3,14 @@ use_experimental_fxv2_oal   "yes"
 lua54       "yes"
 game        "gta5"
 
-name        "x-radiolist"
-version     "0.9.8"
-repository  "https://github.com/XProject/x-radiolist"
-description "Project-X Radio List : List of players in each radio channels to be used with PMA-VOICE"
+name        "rxRadio"
+version     "0.1"
+description "A fork of xRadiolist : List of players in each radio channels to be used with PMA-VOICE"
+
+dependencies {
+    "ox_lib",
+    "pma-voice"
+}
 
 ui_page "web/index.html"
 
