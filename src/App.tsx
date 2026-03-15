@@ -14,7 +14,6 @@ function App() {
               <span id="radio-frequency">{frequency}</span>
             </div>
             <div className="badge-header__text">
-              <span>secure net</span>
               <strong id="radio-channel">{channel}</strong>
             </div>
             <span className="badge-header__count">
