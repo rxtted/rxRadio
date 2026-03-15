@@ -1,0 +1,290 @@
+:root {
+  background: transparent !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+  --pl-accent: #1f6feb;
+  --pl-accent-soft: #7dcfff;
+  --pl-text: rgba(255, 255, 255, 0.85);
+  --pl-text-muted: rgba(255, 255, 255, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+body {
+  font-family:
+    'Segoe UI',
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+  color: var(--pl-text);
+  user-select: none;
+  pointer-events: none;
+}
+
+.radio-app {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.radio-shell {
+  position: absolute;
+  top: 4.5vh;
+  left: 3vh;
+  display: none;
+  min-width: 17rem;
+  max-width: 20rem;
+  animation: panel-in 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.radio-shell--visible {
+  display: block;
+}
+
+.radio-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.badge-header {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(125, 207, 255, 0.2);
+  border-radius: 0.85rem;
+  background: linear-gradient(135deg, rgba(15, 20, 28, 0.95), rgba(9, 13, 19, 0.92));
+  box-shadow:
+    0 0.85rem 2rem rgba(0, 0, 0, 0.6),
+    0 0.25rem 0.65rem rgba(31, 111, 235, 0.12),
+    inset 0 0 0.25rem rgba(255, 255, 255, 0.05);
+}
+
+.badge-header::after {
+  content: '';
+  position: absolute;
+  inset: 0.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  border-radius: 0.85rem;
+}
+
+.badge-header__icon {
+  display: flex;
+  width: 1.3rem;
+  height: 1.3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.45rem;
+  background: radial-gradient(circle at 20% 20%, var(--pl-accent), var(--pl-accent-soft));
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow:
+    0 0.35rem 0.75rem rgba(31, 111, 235, 0.4),
+    inset 0 0 0.35rem rgba(255, 255, 255, 0.2);
+}
+
+#radio-frequency {
+  font-size: 0.72rem;
+  letter-spacing: 0.03rem;
+}
+
+.badge-header__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  line-height: 1.1;
+}
+
+.badge-header__text span {
+  color: var(--pl-text-muted);
+  font-size: 0.55rem;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+}
+
+.badge-header__text strong {
+  background: linear-gradient(135deg, var(--pl-accent), var(--pl-accent-soft));
+  background-clip: text;
+  color: transparent;
+  font-size: 0.95rem;
+  -webkit-background-clip: text;
+}
+
+.badge-header__count {
+  display: inline-flex;
+  margin-left: auto;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--pl-text-muted);
+  font-size: 0.6rem;
+  letter-spacing: 0.07rem;
+  text-transform: uppercase;
+}
+
+.badge-header__count strong {
+  color: var(--pl-accent-soft);
+  font-size: 0.6rem;
+  letter-spacing: 0.03rem;
+}
+
+.radio-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-left: 0.15rem;
+}
+
+.radio-empty {
+  padding: 0.35rem 0;
+  color: var(--pl-text-muted);
+  font-size: 0.8rem;
+}
+
+.radio-empty::after {
+  content: ' - stand by -';
+  font-size: 0.75rem;
+  letter-spacing: 0.05rem;
+  text-transform: uppercase;
+}
+
+.radio-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.radio-entry {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(11, 15, 23, 0.65);
+  box-shadow: 0 0.35rem 1.1rem rgba(0, 0, 0, 0.45);
+  color: var(--pl-text);
+  font-size: 0.82rem;
+  padding: 0.3rem 0.75rem;
+}
+
+.radio-entry__info {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.radio-entry__pulse {
+  width: 0.3rem;
+  height: 0.3rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(125, 207, 255, 0.4);
+  animation: idle-pulse 2.5s ease-in-out infinite;
+}
+
+.radio-entry__name {
+  overflow: hidden;
+  font-weight: 600;
+  letter-spacing: 0.01rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.radio-entry__pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(31, 111, 235, 0.18);
+  color: var(--pl-accent-soft);
+  font-size: 0.62rem;
+  letter-spacing: 0.08rem;
+  padding: 0.12rem 0.45rem;
+  text-transform: uppercase;
+}
+
+.radio-entry--self {
+  color: #fff;
+}
+
+.radio-entry--talking {
+  color: var(--pl-accent-soft);
+}
+
+.radio-entry--talking .radio-entry__pulse {
+  background: var(--pl-accent-soft);
+  animation: speaking 0.8s ease-in-out infinite;
+  box-shadow: 0 0 0.4rem rgba(31, 111, 235, 0.6);
+}
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes idle-pulse {
+  0% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.15);
+  }
+
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+}
+
+@keyframes speaking {
+  0% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 0.6;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radio-shell,
+  .radio-entry__pulse {
+    animation: none;
+  }
+}

@@ -12,10 +12,12 @@ dependencies {
     "pma-voice"
 }
 
-ui_page "web/index.html"
+ui_page "web/dist/index.html"
 
 files {
-    "web/index.html"
+    "web/dist/index.html",
+    "web/dist/*",
+    "web/dist/assets/*"
 }
 
 shared_scripts {
