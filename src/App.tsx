@@ -36,11 +36,11 @@ function App() {
                     .join(' ')}
                   key={entry.id}
                 >
+                  {entry.isSelf ? <span className="radio-entry__self-tag">You</span> : null}
                   <div className="radio-entry__info">
-                    <span aria-hidden="true" className="radio-entry__pulse" />
                     <span className="radio-entry__name">{entry.name}</span>
                   </div>
-                  {entry.isSelf ? <span className="radio-entry__pill">You</span> : null}
+                  <span className="radio-entry__status" aria-hidden="true" />
                 </article>
               ))}
             </div>
