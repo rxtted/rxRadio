@@ -135,11 +135,6 @@ const reduceRadioUiState = (currentState: RadioUiState, lastMessage: RadioMessag
     }
   }
 
-  nextState = {
-    ...nextState,
-    entries: sortEntries(nextState.entries),
-  }
-
   return nextState
 }
 
