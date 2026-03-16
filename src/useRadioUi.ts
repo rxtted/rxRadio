@@ -29,6 +29,13 @@ const formatFrequency = (value?: string | number) => {
   return raw.slice(0, 4).toUpperCase()
 }
 
+const sortEntries = (entries: RadioEntry[]) =>
+  [...entries].sort((leftEntry, rightEntry) =>
+    leftEntry.name.localeCompare(rightEntry.name, undefined, {
+      sensitivity: 'base',
+    }),
+  )
+
 const upsertEntry = (
   entries: RadioEntry[],
   message: Required<Pick<RadioMessage, 'radioId' | 'radioName'>> & Pick<RadioMessage, 'self'>,
@@ -47,13 +54,8 @@ const upsertEntry = (
     nextEntries.splice(index, 1)
   }
 
-  if (nextEntry.isSelf) {
-    nextEntries.unshift(nextEntry)
-  } else {
-    nextEntries.push(nextEntry)
-  }
-
-  return nextEntries
+  nextEntries.push(nextEntry)
+  return sortEntries(nextEntries)
 }
 
 const reduceRadioUiState = (currentState: RadioUiState, lastMessage: RadioMessage) => {
@@ -131,6 +133,11 @@ const reduceRadioUiState = (currentState: RadioUiState, lastMessage: RadioMessag
       ...nextState,
       entries: nextState.entries.filter((entry) => entry.id !== lastMessage.radioId),
     }
+  }
+
+  nextState = {
+    ...nextState,
+    entries: sortEntries(nextState.entries),
   }
 
   return nextState
