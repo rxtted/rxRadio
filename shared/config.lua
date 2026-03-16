@@ -8,9 +8,11 @@ Config.HideRadioListVisibilityByDefault = false         -- If set to true and a 
 Config.RadioListEditCommand = "radiodisplayedit"        -- Lets players edit the radio list on screen
 Config.RadioListEditConfirmCommand = "radiodisplayeditconfirm"
 Config.RadioListEditConfirmKeybind = "RETURN"
+Config.RadioListResetCommand = "radiodisplayreset"
 Config.RadioListEditModeEnabledMessage = "You can now edit the radio list. Drag or resize it and press [%s] to finish."
 Config.RadioListEditModeDisabledMessage = "Radio list edit mode disabled."
 Config.RadioListEditModeSavedMessage = "Radio list layout saved."
+Config.RadioListResetMessage = "Radio list layout reset to the default profile."
 
 Config.LetPlayersSetTheirOwnNameInRadio = true          -- Let players to customize how their name is displayed on the list
 Config.RadioListChangeNameCommand = "callsign"          -- Only works if Config.LetPlayersSetTheirOwnNameInRadio is set to true

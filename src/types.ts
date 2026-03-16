@@ -27,6 +27,7 @@ export type RadioMessage = {
   changeEditMode?: boolean
   editMode?: boolean
   applySavedLayout?: boolean
+  resetSavedLayout?: boolean
   layout?: RadioLayout
 }
 

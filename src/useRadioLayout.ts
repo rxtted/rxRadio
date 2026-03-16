@@ -89,6 +89,11 @@ export const useRadioLayout = () => {
     const onMessage = (event: MessageEvent<RadioMessage>) => {
       const nextMessage = event.data ?? {}
 
+      if (nextMessage.resetSavedLayout) {
+        setLayout(null)
+        return
+      }
+
       if (!nextMessage.applySavedLayout || !nextMessage.layout) {
         return
       }

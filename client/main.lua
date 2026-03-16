@@ -35,6 +35,11 @@ local function saveRadioLayout(layout)
     }))
 end
 
+local function resetRadioLayout()
+    DeleteResourceKvp(radioLayoutKvpKey)
+    SendNUIMessage({ resetSavedLayout = true })
+end
+
 local function closeTheRadioList()
     playersInRadio, currentRadioChannel, currentRadioChannelName = {}, nil, nil
     SendNUIMessage({ clearRadioList = true })
@@ -165,8 +170,18 @@ RegisterCommand(Config.RadioListEditConfirmCommand, function()
     notifyEditMode(Config.RadioListEditModeSavedMessage)
 end, false)
 
+RegisterCommand(Config.RadioListResetCommand, function()
+    if radioListEditMode then
+        setRadioListEditMode(false)
+    end
+
+    resetRadioLayout()
+    notifyEditMode(Config.RadioListResetMessage)
+end, false)
+
 RegisterKeyMapping(Config.RadioListEditConfirmCommand, "Finish editing the radio list", "keyboard", Config.RadioListEditConfirmKeybind)
 TriggerEvent("chat:addSuggestion", "/"..Config.RadioListEditCommand, "Edit the radio list on screen")
+TriggerEvent("chat:addSuggestion", "/"..Config.RadioListResetCommand, "Reset the radio list layout to the default profile")
 
 if Config.LetPlayersSetTheirOwnNameInRadio then
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListChangeNameCommand, "Customize your name to be shown in radio list", { { name = "customized name", help = "Enter your desired name to be shown in radio list" } })
