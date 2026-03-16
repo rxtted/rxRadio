@@ -42,7 +42,7 @@ body {
 
 .radio-shell {
   position: absolute;
-  top: 6vh;
+  top: 8vh;
   right: 3vh;
   display: none;
   min-width: 17rem;
