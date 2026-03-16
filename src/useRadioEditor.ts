@@ -92,7 +92,7 @@ export const useRadioEditor = ({
     return () => {
       window.removeEventListener('keydown', onKeyDown)
     }
-  }, [isEditMode, layout])
+  }, [isEditMode, layout, shellRef])
 
   const startDrag: PointerEventHandler<HTMLElement> = (event) => {
     if (!isEditMode || event.button !== 0 || !shellRef.current) {
