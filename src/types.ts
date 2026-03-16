@@ -8,6 +8,8 @@ export type RadioMessage = {
   clearRadioList?: boolean
   changeVisibility?: boolean
   visible?: boolean
+  changeMoveMode?: boolean
+  moveMode?: boolean
 }
 
 export type RadioEntry = {
@@ -23,4 +25,11 @@ export type RadioState = {
   entries: RadioEntry[]
   isForcedHidden: boolean
   isPanelActive: boolean
+  isMoveMode: boolean
+}
+
+declare global {
+  interface Window {
+    GetParentResourceName?: () => string
+  }
 }

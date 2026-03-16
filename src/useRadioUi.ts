@@ -12,6 +12,7 @@ const initialState: RadioState = {
   entries: [],
   isForcedHidden: false,
   isPanelActive: false,
+  isMoveMode: false,
 }
 
 const formatFrequency = (value?: string | number) => {
@@ -71,6 +72,7 @@ export const useRadioUi = () => {
         return {
           ...initialState,
           isForcedHidden: currentState.isForcedHidden,
+          isMoveMode: currentState.isMoveMode,
         }
       }
 
@@ -80,6 +82,14 @@ export const useRadioUi = () => {
         nextState = {
           ...nextState,
           isForcedHidden: message.visible !== true,
+        }
+      }
+
+      if (message.changeMoveMode) {
+        nextState = {
+          ...nextState,
+          isMoveMode: message.moveMode === true,
+          isPanelActive: message.moveMode === true || nextState.isPanelActive,
         }
       }
 
@@ -170,7 +180,7 @@ export const useRadioUi = () => {
   return {
     ...state,
     memberCount: state.entries.length,
-    isVisible: state.isPanelActive && !state.isForcedHidden,
+    isVisible: (state.isPanelActive && !state.isForcedHidden) || state.isMoveMode,
     isEmpty: state.entries.length === 0,
   }
 }

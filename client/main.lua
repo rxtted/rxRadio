@@ -1,7 +1,12 @@
 local playerServerID = GetPlayerServerId(PlayerId())
 local playersInRadio, currentRadioChannel, currentRadioChannelName = {}, nil, nil
 local allowedToSeeRadioList, radioListVisibility = true, true
+local radioListMoveMode = false
 local temporaryName = "temporaryPlayerNameAsAWorkaroundForABugInPMA-VOICEWhichEventsGetCalledTwiceWhileThePlayerConnectsToTheRadioForFirstTime"
+
+local function notifyMoveMode(message, notificationType)
+    Config.ClientNotification(message, notificationType)
+end
 
 local function closeTheRadioList()
     playersInRadio, currentRadioChannel, currentRadioChannelName = {}, nil, nil
@@ -11,6 +16,28 @@ end
 local function modifyTheRadioListVisibility(state)
     SendNUIMessage({ changeVisibility = true, visible = (allowedToSeeRadioList and state) or false })
 end
+
+local function setRadioListMoveMode(state)
+    if radioListMoveMode == state then return end
+    radioListMoveMode = state
+    SetNuiFocus(state, state)
+    SetNuiFocusKeepInput(false)
+
+    if not state then
+        SetNuiFocus(false, false)
+    end
+
+    SendNUIMessage({ changeMoveMode = true, moveMode = state })
+end
+
+RegisterNUICallback("finishMoveMode", function(_, cb)
+    if radioListMoveMode then
+        setRadioListMoveMode(false)
+        notifyMoveMode(Config.RadioListMoveModeSavedMessage)
+    end
+
+    cb({})
+end)
 
 local function addServerIdToPlayerName(serverId, playerName)
     if Config.ShowPlayersServerIdNextToTheirName then
@@ -88,6 +115,25 @@ if Config.LetPlayersChangeVisibilityOfRadioList then
     end)
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListVisibilityCommand, "Show/Hide Radio List")
 end
+
+RegisterCommand(Config.RadioListMoveCommand, function()
+    setRadioListMoveMode(not radioListMoveMode)
+
+    if radioListMoveMode then
+        notifyMoveMode(Config.RadioListMoveModeEnabledMessage:format(Config.RadioListMoveConfirmKeybind))
+    else
+        notifyMoveMode(Config.RadioListMoveModeDisabledMessage)
+    end
+end, false)
+
+RegisterCommand(Config.RadioListMoveConfirmCommand, function()
+    if not radioListMoveMode then return end
+    setRadioListMoveMode(false)
+    notifyMoveMode(Config.RadioListMoveModeSavedMessage)
+end, false)
+
+RegisterKeyMapping(Config.RadioListMoveConfirmCommand, "Finish moving the radio list", "keyboard", Config.RadioListMoveConfirmKeybind)
+TriggerEvent("chat:addSuggestion", "/"..Config.RadioListMoveCommand, "Move the radio list on screen")
 
 if Config.LetPlayersSetTheirOwnNameInRadio then
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListChangeNameCommand, "Customize your name to be shown in radio list", { { name = "customized name", help = "Enter your desired name to be shown in radio list" } })
