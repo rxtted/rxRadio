@@ -2,10 +2,12 @@ export function RadioHeader({
   channel,
   frequency,
   memberCount,
+  isEmpty,
 }: {
   channel: string
   frequency: string
   memberCount: number
+  isEmpty: boolean
 }) {
   return (
     <header className="badge-header">
@@ -16,7 +18,7 @@ export function RadioHeader({
         <strong id="radio-channel">{channel}</strong>
       </div>
       <span className="badge-header__count">
-        online <strong id="radio-member-count">{memberCount}</strong>
+        {isEmpty ? '..' : 'online'} <strong id="radio-member-count">{isEmpty ? '..' : memberCount}</strong>
       </span>
     </header>
   )

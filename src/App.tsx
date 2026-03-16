@@ -79,8 +79,8 @@ function App() {
         style={shellStyle}
       >
         <div className="radio-panel">
-          <RadioHeader channel={channel} frequency={frequency} memberCount={memberCount} />
-          <RadioMemberList entries={entries} isEmpty={entries.length === 0} />
+          <RadioHeader channel={channel} frequency={frequency} isEmpty={entries.length === 0} memberCount={memberCount} />
+          <RadioMemberList entries={entries} />
           {isEditModeActive ? <RadioResizeHandles onPointerDown={startResize} /> : null}
         </div>
       </section>

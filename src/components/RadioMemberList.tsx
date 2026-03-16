@@ -1,9 +1,8 @@
 import type { RadioEntry } from '../types'
 
-export function RadioMemberList({ entries, isEmpty }: { entries: RadioEntry[]; isEmpty: boolean }) {
+export function RadioMemberList({ entries }: { entries: RadioEntry[] }) {
   return (
     <div className="radio-body">
-      {isEmpty ? <div className="radio-empty">Waiting for traffic</div> : null}
       <div className="radio-list">
         {entries.map((entry) => (
           <article

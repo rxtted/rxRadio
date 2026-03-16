@@ -253,19 +253,6 @@ body {
   margin-right: 0.15rem;
 }
 
-.radio-empty {
-  padding: 0.35rem 0;
-  color: var(--pl-text-muted);
-  font-size: 0.8rem;
-}
-
-.radio-empty::after {
-  content: ' - stand by -';
-  font-size: 0.75rem;
-  letter-spacing: 0.05rem;
-  text-transform: uppercase;
-}
-
 .radio-list {
   display: flex;
   flex-direction: column;

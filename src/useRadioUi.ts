@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 
 import type { RadioEntry, RadioMessage, RadioUiState } from './types'
 
-const DEFAULT_CHANNEL = 'Radio Net'
-const DEFAULT_FREQUENCY = '--'
+const DEFAULT_CHANNEL = '..'
+const DEFAULT_FREQUENCY = '..'
 
 const initialState: RadioUiState = {
   channel: DEFAULT_CHANNEL,
