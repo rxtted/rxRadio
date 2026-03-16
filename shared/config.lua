@@ -14,6 +14,11 @@ Config.RadioListEditModeDisabledMessage = "Radio list edit mode disabled."
 Config.RadioListEditModeSavedMessage = "Radio list layout saved."
 Config.RadioListResetMessage = "Radio list layout reset to the default profile."
 
+Config.Debug = {
+    Enabled = true,                                -- Enables debug-only commands and suggestions
+    MockRadioEntriesCommand = "rx-radiomock",  -- Adds local mock radio entries for UI testing
+}
+
 Config.LetPlayersSetTheirOwnNameInRadio = true          -- Let players to customize how their name is displayed on the list
 Config.RadioListChangeNameCommand = "callsign"          -- Only works if Config.LetPlayersSetTheirOwnNameInRadio is set to true
 Config.ResetPlayersCustomizedNameOnExit = true          -- Resets customized name players set for themselves on their server exit

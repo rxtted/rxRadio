@@ -101,6 +101,66 @@ local function removePlayerFromTheRadioList(playerId)
     SendNUIMessage({ radioId = playerId })
 end
 
+local function getUsedDebugMockSuffixes()
+    local usedSuffixes = {}
+
+    for _, playerName in pairs(playersInRadio) do
+        if type(playerName) == "string" then
+            local suffix = playerName:match("^AW%-(2%d%d)")
+            if suffix then
+                usedSuffixes[suffix] = true
+            end
+        end
+    end
+
+    return usedSuffixes
+end
+
+local function getNextDebugMockRadioId()
+    local debugRadioId = 900000
+
+    while playersInRadio[debugRadioId] do
+        debugRadioId += 1
+    end
+
+    return debugRadioId
+end
+
+local function addDebugMockEntries(count)
+    if not currentRadioChannel or currentRadioChannel <= 0 then
+        notifyEditMode("Join a radio channel before adding mock entries.", "error")
+        return
+    end
+
+    local usedSuffixes = getUsedDebugMockSuffixes()
+    local availableSuffixes = {}
+
+    for tens = 0, 9 do
+        for ones = 0, 9 do
+            local suffix = ("2%s%s"):format(tens, ones)
+            if not usedSuffixes[suffix] then
+                availableSuffixes[#availableSuffixes + 1] = suffix
+            end
+        end
+    end
+
+    if count > #availableSuffixes then
+        notifyEditMode(("Only %s unique AW-2xx mock entries are available right now."):format(#availableSuffixes), "error")
+        return
+    end
+
+    for index = 1, count do
+        local randomIndex = math.random(1, #availableSuffixes)
+        local suffix = table.remove(availableSuffixes, randomIndex)
+        local debugRadioId = getNextDebugMockRadioId()
+        local debugName = ("AW-%s"):format(suffix)
+
+        addPlayerToTheRadioList(debugRadioId, debugName)
+    end
+
+    notifyEditMode(("Added %s mock radio entr%s."):format(count, count == 1 and "y" or "ies"))
+end
+
 RegisterNetEvent("pma-voice:addPlayerToRadio", function(playerId)
     if not currentRadioChannel or not (currentRadioChannel > 0) then return end
     addPlayerToTheRadioList(playerId)
@@ -182,6 +242,29 @@ end, false)
 RegisterKeyMapping(Config.RadioListEditConfirmCommand, "Finish editing the radio list", "keyboard", Config.RadioListEditConfirmKeybind)
 TriggerEvent("chat:addSuggestion", "/"..Config.RadioListEditCommand, "Edit the radio list on screen")
 TriggerEvent("chat:addSuggestion", "/"..Config.RadioListResetCommand, "Reset the radio list layout to the default profile")
+
+if Config.Debug and Config.Debug.Enabled then
+    RegisterCommand(Config.Debug.MockRadioEntriesCommand, function(_, args)
+        local count = tonumber(args[1])
+
+        if not count then
+            notifyEditMode("Usage: /"..Config.Debug.MockRadioEntriesCommand.." [count]", "error")
+            return
+        end
+
+        count = math.floor(count)
+        if count <= 0 then
+            notifyEditMode("Mock entry count must be 1 or higher.", "error")
+            return
+        end
+
+        addDebugMockEntries(count)
+    end, false)
+
+    TriggerEvent("chat:addSuggestion", "/"..Config.Debug.MockRadioEntriesCommand, "Add local AW-2xx mock entries to the radio list", {
+        { name = "count", help = "Number of unique mock entries to add" }
+    })
+end
 
 if Config.LetPlayersSetTheirOwnNameInRadio then
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListChangeNameCommand, "Customize your name to be shown in radio list", { { name = "customized name", help = "Enter your desired name to be shown in radio list" } })
