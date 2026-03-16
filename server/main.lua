@@ -2,6 +2,8 @@ local pma_voice = exports["pma-voice"]
 local Framework = {}
 local customPlayerNames = {}
 local customRadioNames = {}
+local trackedRadioChannels = {}
+local ensurePlayerNameInitialized
 
 local function isPlayerAllowedToChangeName(_, _)
     return Config.LetPlayersSetTheirOwnNameInRadio
@@ -65,6 +67,26 @@ local function broadcastPlayerDisplayUpdate(playerId, playerName)
     end
 end
 
+local function broadcastRadioMemberAdded(playerId, radioChannel)
+    if not radioChannel or not (radioChannel > 0) then return end
+
+    local playerName = ensurePlayerNameInitialized(playerId)
+    if not playerName then return end
+
+    local channelName = getRadioChannelName(radioChannel)
+    for target in pairs(pma_voice:getPlayersInRadioChannel(radioChannel)) do
+        TriggerClientEvent(Shared.Event.addPlayerToRadio, target, playerId, playerName, channelName, radioChannel)
+    end
+end
+
+local function broadcastRadioMemberRemoved(playerId, radioChannel)
+    if not radioChannel or not (radioChannel > 0) then return end
+
+    for target in pairs(pma_voice:getPlayersInRadioChannel(radioChannel)) do
+        TriggerClientEvent(Shared.Event.removePlayerFromRadio, target, playerId)
+    end
+end
+
 local function broadcastChannelDisplayUpdate(radioChannel)
     if not radioChannel or not (radioChannel > 0) then return end
 
@@ -87,7 +109,7 @@ local function resolvePlayerName(source)
     return customPlayerNames[getPlayerIdentifier(source)] or (Config.UseRPName and Framework.GetPlayerName(source)) or GetPlayerName(source)
 end
 
-local function ensurePlayerNameInitialized(source)
+ensurePlayerNameInitialized = function(source)
     local playerName = Player(source).state[Shared.State.nameInRadio]
     if playerName then
         return playerName
@@ -173,6 +195,12 @@ if Config.LetPlayersChangeRadioChannelsName then
 end
 
 local function onPlayerDropped(source)
+    local previousRadioChannel = trackedRadioChannels[source]
+    if previousRadioChannel and previousRadioChannel > 0 then
+        trackedRadioChannels[source] = nil
+        broadcastRadioMemberRemoved(source, previousRadioChannel)
+    end
+
     if Config.ResetPlayersCustomizedNameOnExit then
         local playerIdentifier = getPlayerIdentifier(source)
         if customPlayerNames[playerIdentifier] then
@@ -200,6 +228,28 @@ end)
 
 AddEventHandler("onServerResourceStop", function(resource)
     onResourceStopped(resource)
+end)
+
+AddStateBagChangeHandler("radioChannel", nil, function(bagName, _, value)
+    local source = tonumber(bagName:match("^player:(%d+)$"), 10)
+    if not source then return end
+
+    local previousRadioChannel = trackedRadioChannels[source]
+    local nextRadioChannel = tonumber(value) or 0
+
+    if previousRadioChannel == nextRadioChannel then
+        return
+    end
+
+    trackedRadioChannels[source] = nextRadioChannel > 0 and nextRadioChannel or nil
+
+    if previousRadioChannel and previousRadioChannel > 0 then
+        broadcastRadioMemberRemoved(source, previousRadioChannel)
+    end
+
+    if nextRadioChannel > 0 then
+        broadcastRadioMemberAdded(source, nextRadioChannel)
+    end
 end)
 
 if Framework.Initial == "esx" then

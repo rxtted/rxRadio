@@ -83,7 +83,7 @@ end
 local function addPlayerToTheRadioList(playerId, playerName)
     if playersInRadio[playerId] then return end
     playersInRadio[playerId] = temporaryName
-    playersInRadio[playerId] = addServerIdToPlayerName(playerId, playerName or Player(playerId).state[Shared.State.nameInRadio] or callback.await(Shared.Callback.getPlayerName, false, playerId))
+    playersInRadio[playerId] = addServerIdToPlayerName(playerId, playerName or Player(playerId).state[Shared.State.nameInRadio])
     SendNUIMessage({
         self = playerId == playerServerID,
         radioId = playerId,
@@ -178,13 +178,16 @@ local function addDebugMockEntries(count)
     notifyEditMode(("Added %s mock radio entr%s."):format(count, count == 1 and "y" or "ies"))
 end
 
-RegisterNetEvent("pma-voice:addPlayerToRadio", function(playerId)
-    if not currentRadioChannel or not (currentRadioChannel > 0) then return end
-    addPlayerToTheRadioList(playerId)
+RegisterNetEvent(Shared.Event.addPlayerToRadio, function(playerId, playerName, channelName, channelFrequency)
+    if not playerId or not playerName or not channelFrequency then return end
+
+    currentRadioChannel = channelFrequency
+    currentRadioChannelName = channelName or currentRadioChannelName
+    addPlayerToTheRadioList(playerId, playerName)
 end)
 
-RegisterNetEvent("pma-voice:removePlayerFromRadio", function(playerId)
-    if not currentRadioChannel or not (currentRadioChannel > 0) then return end
+RegisterNetEvent(Shared.Event.removePlayerFromRadio, function(playerId)
+    if not playerId then return end
     removePlayerFromTheRadioList(playerId)
 end)
 
