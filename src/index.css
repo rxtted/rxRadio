@@ -50,13 +50,13 @@ body {
 .radio-edit-overlay__bounds {
   position: absolute;
   inset: 1.5vh;
-  border: 1px dashed rgba(125, 207, 255, 0.24);
+  border: 1px dashed rgba(125, 207, 255, 0.2);
   background:
-    linear-gradient(rgba(125, 207, 255, 0.035), rgba(125, 207, 255, 0.02)),
+    linear-gradient(rgba(125, 207, 255, 0.035), rgba(125, 207, 255, 0.04)),
     repeating-linear-gradient(
       135deg,
-      rgba(125, 207, 255, 0.03) 0,
-      rgba(125, 207, 255, 0.03) 0.6rem,
+      rgba(125, 207, 255, 0.05) 0,
+      rgba(125, 207, 255, 0.05) 0.6rem,
       rgba(125, 207, 255, 0.015) 0.6rem,
       rgba(125, 207, 255, 0.015) 1.2rem
     );
