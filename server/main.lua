@@ -83,18 +83,33 @@ local function setPlayerName(source, newName)
     Config.Notification(source, ("Your name on radio changed to %s"):format(newName))
 end
 
-local function getPlayerName(source)
+local function resolvePlayerName(source)
+    return customPlayerNames[getPlayerIdentifier(source)] or (Config.UseRPName and Framework.GetPlayerName(source)) or GetPlayerName(source)
+end
+
+local function ensurePlayerNameInitialized(source)
     local playerName = Player(source).state[Shared.State.nameInRadio]
-    if not playerName then
-        playerName = customPlayerNames[getPlayerIdentifier(source)] or (Config.UseRPName and Framework.GetPlayerName(source)) or GetPlayerName(source)
-        setPlayerName(source, playerName)
+    if playerName then
+        return playerName
     end
+
+    playerName = resolvePlayerName(source)
+    if not playerName then
+        return nil
+    end
+
+    customPlayerNames[getPlayerIdentifier(source)] = playerName
+    Player(source).state:set(Shared.State.nameInRadio, playerName, true)
     return playerName
+end
+
+local function getPlayerName(source)
+    return Player(source).state[Shared.State.nameInRadio] or resolvePlayerName(source)
 end
 
 local function resetPlayerName(source)
     Player(source).state:set(Shared.State.nameInRadio, nil, true)
-    local playerName = getPlayerName(source)
+    local playerName = ensurePlayerNameInitialized(source)
     broadcastPlayerDisplayUpdate(source, playerName)
 end
 
@@ -108,14 +123,14 @@ callback.register(Shared.Callback.getPlayersInRadio, function(source, radioChann
     radioChannel = radioChannel or Player(source).state.radioChannel
     if not radioChannel then return playersInRadio end
     for player in pairs(pma_voice:getPlayersInRadioChannel(radioChannel)) do
-        playersInRadio[player] = getPlayerName(player)
+        playersInRadio[player] = ensurePlayerNameInitialized(player)
     end
     local radioChannelName = getRadioChannelName(radioChannel)
     return playersInRadio, radioChannel, radioChannelName
 end)
 
 callback.register(Shared.Callback.getPlayerName, function(_, player)
-    return getPlayerName(player)
+    return ensurePlayerNameInitialized(player)
 end)
 
 if Config.LetPlayersSetTheirOwnNameInRadio then
