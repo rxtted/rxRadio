@@ -1,3 +1,19 @@
+export type RadioLayout = {
+  x: number
+  y: number
+  scale: number
+}
+
+export type EditHandle = 'nw' | 'ne' | 'sw' | 'se' | null
+
+export type EditInteraction = 'idle' | 'drag' | 'resize'
+
+export type EditState = {
+  enabled: boolean
+  handle: EditHandle
+  interaction: EditInteraction
+}
+
 export type RadioMessage = {
   self?: boolean
   radioId?: number
@@ -8,8 +24,10 @@ export type RadioMessage = {
   clearRadioList?: boolean
   changeVisibility?: boolean
   visible?: boolean
-  changeMoveMode?: boolean
-  moveMode?: boolean
+  changeEditMode?: boolean
+  editMode?: boolean
+  applySavedLayout?: boolean
+  layout?: RadioLayout
 }
 
 export type RadioEntry = {
@@ -19,13 +37,13 @@ export type RadioEntry = {
   isTalking: boolean
 }
 
-export type RadioState = {
+export type RadioUiState = {
   channel: string
   frequency: string
   entries: RadioEntry[]
   isForcedHidden: boolean
   isPanelActive: boolean
-  isMoveMode: boolean
+  isEditMode: boolean
 }
 
 declare global {

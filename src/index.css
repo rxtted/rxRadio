@@ -54,12 +54,12 @@ body {
   display: block;
 }
 
-.radio-shell--move-mode {
+.radio-shell--edit-mode {
   pointer-events: auto;
   cursor: grab;
 }
 
-.radio-shell--dragging {
+.radio-shell--editing {
   cursor: grabbing;
 }
 
@@ -67,6 +67,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+}
+
+.radio-shell--edit-mode .radio-panel {
+  outline: 1px dashed rgba(125, 207, 255, 0.28);
+  outline-offset: 0.25rem;
 }
 
 .badge-header {
@@ -288,6 +293,42 @@ body {
   background: var(--pl-accent-soft);
   animation: speaking 0.8s ease-in-out infinite;
   box-shadow: 0 0 0.4rem rgba(31, 111, 235, 0.6);
+}
+
+.radio-resize-handle {
+  position: absolute;
+  width: 0.72rem;
+  height: 0.72rem;
+  border: 1px solid rgba(125, 207, 255, 0.35);
+  background: rgba(10, 18, 26, 0.92);
+  box-shadow:
+    0 0 0.35rem rgba(31, 111, 235, 0.18),
+    inset 0 0 0.15rem rgba(255, 255, 255, 0.08);
+  z-index: 4;
+}
+
+.radio-resize-handle--nw {
+  top: -0.46rem;
+  left: -0.46rem;
+  cursor: nwse-resize;
+}
+
+.radio-resize-handle--ne {
+  top: -0.46rem;
+  right: -0.46rem;
+  cursor: nesw-resize;
+}
+
+.radio-resize-handle--sw {
+  bottom: -0.46rem;
+  left: -0.46rem;
+  cursor: nesw-resize;
+}
+
+.radio-resize-handle--se {
+  right: -0.46rem;
+  bottom: -0.46rem;
+  cursor: nwse-resize;
 }
 
 @keyframes panel-in {

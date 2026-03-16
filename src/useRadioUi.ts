@@ -1,18 +1,17 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useEffect, useState } from 'react'
 
-import { startMockRadioFeed } from './mockRadioFeed'
-import type { RadioEntry, RadioMessage, RadioState } from './types'
+import type { RadioEntry, RadioMessage, RadioUiState } from './types'
 
 const DEFAULT_CHANNEL = 'Radio Net'
 const DEFAULT_FREQUENCY = '--'
 
-const initialState: RadioState = {
+const initialState: RadioUiState = {
   channel: DEFAULT_CHANNEL,
   frequency: DEFAULT_FREQUENCY,
   entries: [],
   isForcedHidden: false,
   isPanelActive: false,
-  isMoveMode: false,
+  isEditMode: false,
 }
 
 const formatFrequency = (value?: string | number) => {
@@ -57,130 +56,105 @@ const upsertEntry = (
   return nextEntries
 }
 
-const toggleTalkingState = (entries: RadioEntry[], radioId: number, isTalking: boolean) =>
-  entries.map((entry) => (entry.id === radioId ? { ...entry, isTalking } : entry))
+const reduceRadioUiState = (currentState: RadioUiState, lastMessage: RadioMessage) => {
+  if (lastMessage.clearRadioList) {
+    return {
+      ...initialState,
+      isEditMode: currentState.isEditMode,
+      isForcedHidden: currentState.isForcedHidden,
+    }
+  }
 
-const removeEntry = (entries: RadioEntry[], radioId: number) =>
-  entries.filter((entry) => entry.id !== radioId)
+  let nextState = currentState
+
+  if (lastMessage.changeVisibility) {
+    nextState = {
+      ...nextState,
+      isForcedHidden: lastMessage.visible !== true,
+    }
+  }
+
+  if (lastMessage.changeEditMode) {
+    nextState = {
+      ...nextState,
+      isEditMode: lastMessage.editMode === true,
+      isPanelActive: lastMessage.editMode === true || nextState.isPanelActive,
+    }
+  }
+
+  if (lastMessage.radioId === undefined || lastMessage.radioId === null) {
+    return nextState
+  }
+
+  nextState = {
+    ...nextState,
+    isPanelActive: true,
+  }
+
+  if (lastMessage.channel) {
+    nextState = {
+      ...nextState,
+      channel: lastMessage.channel,
+    }
+  }
+
+  if (lastMessage.channelFrequency !== undefined) {
+    nextState = {
+      ...nextState,
+      frequency: formatFrequency(lastMessage.channelFrequency),
+    }
+  } else if (lastMessage.channel && nextState.frequency === DEFAULT_FREQUENCY) {
+    nextState = {
+      ...nextState,
+      frequency: formatFrequency(lastMessage.channel),
+    }
+  }
+
+  if (lastMessage.radioName !== undefined) {
+    nextState = {
+      ...nextState,
+      entries: upsertEntry(nextState.entries, {
+        radioId: lastMessage.radioId,
+        radioName: lastMessage.radioName,
+        self: lastMessage.self,
+      }),
+    }
+  } else if (lastMessage.radioTalking !== undefined) {
+    nextState = {
+      ...nextState,
+      entries: nextState.entries.map((entry) =>
+        entry.id === lastMessage.radioId ? { ...entry, isTalking: Boolean(lastMessage.radioTalking) } : entry,
+      ),
+    }
+  } else {
+    nextState = {
+      ...nextState,
+      entries: nextState.entries.filter((entry) => entry.id !== lastMessage.radioId),
+    }
+  }
+
+  return nextState
+}
 
 export const useRadioUi = () => {
-  const [state, setState] = useState<RadioState>(initialState)
-
-  const applyMessage = useEffectEvent((message: RadioMessage) => {
-    setState((currentState) => {
-      if (message.clearRadioList) {
-        return {
-          ...initialState,
-          isForcedHidden: currentState.isForcedHidden,
-          isMoveMode: currentState.isMoveMode,
-        }
-      }
-
-      let nextState = currentState
-
-      if (message.changeVisibility) {
-        nextState = {
-          ...nextState,
-          isForcedHidden: message.visible !== true,
-        }
-      }
-
-      if (message.changeMoveMode) {
-        nextState = {
-          ...nextState,
-          isMoveMode: message.moveMode === true,
-          isPanelActive: message.moveMode === true || nextState.isPanelActive,
-        }
-      }
-
-      if (message.radioId === undefined || message.radioId === null) {
-        return nextState
-      }
-
-      nextState = {
-        ...nextState,
-        isPanelActive: true,
-      }
-
-      if (message.channel) {
-        nextState = {
-          ...nextState,
-          channel: message.channel,
-        }
-      }
-
-      if (message.channelFrequency !== undefined) {
-        nextState = {
-          ...nextState,
-          frequency: formatFrequency(message.channelFrequency),
-        }
-      } else if (message.channel && nextState.frequency === DEFAULT_FREQUENCY) {
-        nextState = {
-          ...nextState,
-          frequency: formatFrequency(message.channel),
-        }
-      }
-
-      if (message.radioName !== undefined) {
-        nextState = {
-          ...nextState,
-          entries: upsertEntry(nextState.entries, {
-            radioId: message.radioId,
-            radioName: message.radioName,
-            self: message.self,
-          }),
-        }
-      } else if (message.radioTalking !== undefined) {
-        nextState = {
-          ...nextState,
-          entries: toggleTalkingState(nextState.entries, message.radioId, Boolean(message.radioTalking)),
-        }
-      } else {
-        nextState = {
-          ...nextState,
-          entries: removeEntry(nextState.entries, message.radioId),
-        }
-      }
-
-      return nextState
-    })
-  })
+  const [state, setState] = useState(initialState)
 
   useEffect(() => {
-    const forceTransparentBackground = () => {
-      const docEl = document.documentElement
-      const body = document.body
-
-      docEl?.style.setProperty('background', 'transparent', 'important')
-      docEl?.style.setProperty('background-color', 'rgba(0,0,0,0)', 'important')
-      body?.style.setProperty('background', 'transparent', 'important')
-      body?.style.setProperty('background-color', 'rgba(0,0,0,0)', 'important')
+    const onMessage = (event: MessageEvent<RadioMessage>) => {
+      const nextMessage = event.data ?? {}
+      setState((currentState) => reduceRadioUiState(currentState, nextMessage))
     }
 
-    const handleMessage = (event: MessageEvent<RadioMessage>) => {
-      applyMessage(event.data ?? {})
-    }
-
-    forceTransparentBackground()
-    window.addEventListener('message', handleMessage)
+    window.addEventListener('message', onMessage)
 
     return () => {
-      window.removeEventListener('message', handleMessage)
+      window.removeEventListener('message', onMessage)
     }
-  }, [])
-
-  useEffect(() => {
-    if (!import.meta.env.DEV) {
-      return
-    }
-
-    return startMockRadioFeed()
   }, [])
 
   return {
     ...state,
+    isVisible: (state.isPanelActive && !state.isForcedHidden) || state.isEditMode,
     memberCount: state.entries.length,
-    isVisible: (state.isPanelActive && !state.isForcedHidden) || state.isMoveMode,
-    isEmpty: state.entries.length === 0,
   }
 }

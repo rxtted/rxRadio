@@ -1,11 +1,38 @@
 local playerServerID = GetPlayerServerId(PlayerId())
 local playersInRadio, currentRadioChannel, currentRadioChannelName = {}, nil, nil
 local allowedToSeeRadioList, radioListVisibility = true, true
-local radioListMoveMode = false
+local radioListEditMode = false
+local radioLayoutKvpKey = ("%s_layout"):format(GetCurrentResourceName())
 local temporaryName = "temporaryPlayerNameAsAWorkaroundForABugInPMA-VOICEWhichEventsGetCalledTwiceWhileThePlayerConnectsToTheRadioForFirstTime"
 
-local function notifyMoveMode(message, notificationType)
+local function notifyEditMode(message, notificationType)
     Config.ClientNotification(message, notificationType)
+end
+
+local function loadSavedRadioLayout()
+    local raw = GetResourceKvpString(radioLayoutKvpKey)
+    if not raw or raw == "" then return nil end
+
+    local ok, decoded = pcall(json.decode, raw)
+    if not ok or type(decoded) ~= "table" then return nil end
+
+    local x, y, scale = tonumber(decoded.x), tonumber(decoded.y), tonumber(decoded.scale)
+    if not x or not y or not scale then return nil end
+
+    return { x = x, y = y, scale = scale }
+end
+
+local function saveRadioLayout(layout)
+    if type(layout) ~= "table" then return end
+
+    local x, y, scale = tonumber(layout.x), tonumber(layout.y), tonumber(layout.scale)
+    if not x or not y or not scale then return end
+
+    SetResourceKvp(radioLayoutKvpKey, json.encode({
+        x = x,
+        y = y,
+        scale = scale
+    }))
 end
 
 local function closeTheRadioList()
@@ -17,9 +44,9 @@ local function modifyTheRadioListVisibility(state)
     SendNUIMessage({ changeVisibility = true, visible = (allowedToSeeRadioList and state) or false })
 end
 
-local function setRadioListMoveMode(state)
-    if radioListMoveMode == state then return end
-    radioListMoveMode = state
+local function setRadioListEditMode(state)
+    if radioListEditMode == state then return end
+    radioListEditMode = state
     SetNuiFocus(state, state)
     SetNuiFocusKeepInput(false)
 
@@ -27,13 +54,14 @@ local function setRadioListMoveMode(state)
         SetNuiFocus(false, false)
     end
 
-    SendNUIMessage({ changeMoveMode = true, moveMode = state })
+    SendNUIMessage({ changeEditMode = true, editMode = state })
 end
 
-RegisterNUICallback("finishMoveMode", function(_, cb)
-    if radioListMoveMode then
-        setRadioListMoveMode(false)
-        notifyMoveMode(Config.RadioListMoveModeSavedMessage)
+RegisterNUICallback("finishEditMode", function(data, cb)
+    if radioListEditMode then
+        saveRadioLayout(data and data.layout)
+        setRadioListEditMode(false)
+        notifyEditMode(Config.RadioListEditModeSavedMessage)
     end
 
     cb({})
@@ -88,52 +116,57 @@ RegisterNetEvent("pma-voice:syncRadioData", function()
     _playersInRadio = nil
 end)
 
--- set talkingState on radio for self
 RegisterNetEvent("pma-voice:radioActive")
 AddEventHandler("pma-voice:radioActive", function(talkingState)
     SendNUIMessage({ radioId = playerServerID, radioTalking = talkingState })
 end)
 
--- set talkingState on radio for other radio members
 RegisterNetEvent("pma-voice:setTalkingOnRadio")
 AddEventHandler("pma-voice:setTalkingOnRadio", function(source, talkingState)
     SendNUIMessage({ radioId = source, radioTalking = talkingState })
 end)
 
-AddStateBagChangeHandler(Shared.State.allowedToSeeRadioList, ("player:%s"):format(playerServerID), function(bagName, key, value)
+AddStateBagChangeHandler(Shared.State.allowedToSeeRadioList, ("player:%s"):format(playerServerID), function(bagName, _, value)
     local receivedPlayerServerId = tonumber(bagName:gsub('player:', ''), 10)
     if not receivedPlayerServerId or receivedPlayerServerId ~= playerServerID then return end
     allowedToSeeRadioList = (value == nil and false) or value
     modifyTheRadioListVisibility(radioListVisibility)
 end)
 
+CreateThread(function()
+    Wait(250)
+    local savedLayout = loadSavedRadioLayout()
+    if savedLayout then
+        SendNUIMessage({ applySavedLayout = true, layout = savedLayout })
+    end
+end)
+
 if Config.LetPlayersChangeVisibilityOfRadioList then
-    ---@diagnostic disable-next-line: missing-parameter
-    RegisterCommand(Config.RadioListVisibilityCommand,function()
+    RegisterCommand(Config.RadioListVisibilityCommand, function()
         radioListVisibility = not radioListVisibility
         modifyTheRadioListVisibility(radioListVisibility)
     end)
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListVisibilityCommand, "Show/Hide Radio List")
 end
 
-RegisterCommand(Config.RadioListMoveCommand, function()
-    setRadioListMoveMode(not radioListMoveMode)
+RegisterCommand(Config.RadioListEditCommand, function()
+    setRadioListEditMode(not radioListEditMode)
 
-    if radioListMoveMode then
-        notifyMoveMode(Config.RadioListMoveModeEnabledMessage:format(Config.RadioListMoveConfirmKeybind))
+    if radioListEditMode then
+        notifyEditMode(Config.RadioListEditModeEnabledMessage:format(Config.RadioListEditConfirmKeybind))
     else
-        notifyMoveMode(Config.RadioListMoveModeDisabledMessage)
+        notifyEditMode(Config.RadioListEditModeDisabledMessage)
     end
 end, false)
 
-RegisterCommand(Config.RadioListMoveConfirmCommand, function()
-    if not radioListMoveMode then return end
-    setRadioListMoveMode(false)
-    notifyMoveMode(Config.RadioListMoveModeSavedMessage)
+RegisterCommand(Config.RadioListEditConfirmCommand, function()
+    if not radioListEditMode then return end
+    setRadioListEditMode(false)
+    notifyEditMode(Config.RadioListEditModeSavedMessage)
 end, false)
 
-RegisterKeyMapping(Config.RadioListMoveConfirmCommand, "Finish moving the radio list", "keyboard", Config.RadioListMoveConfirmKeybind)
-TriggerEvent("chat:addSuggestion", "/"..Config.RadioListMoveCommand, "Move the radio list on screen")
+RegisterKeyMapping(Config.RadioListEditConfirmCommand, "Finish editing the radio list", "keyboard", Config.RadioListEditConfirmKeybind)
+TriggerEvent("chat:addSuggestion", "/"..Config.RadioListEditCommand, "Edit the radio list on screen")
 
 if Config.LetPlayersSetTheirOwnNameInRadio then
     TriggerEvent("chat:addSuggestion", "/"..Config.RadioListChangeNameCommand, "Customize your name to be shown in radio list", { { name = "customized name", help = "Enter your desired name to be shown in radio list" } })

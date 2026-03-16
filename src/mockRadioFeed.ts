@@ -11,17 +11,34 @@ const dispatchRadioMessage = (message: RadioMessage) => {
 }
 
 export const startMockRadioFeed = () => {
-  dispatchRadioMessage({ changeVisibility: true, visible: true })
-
-  for (const entry of mockEntries) {
+  const bootstrapTimeout = window.setTimeout(() => {
     dispatchRadioMessage({
-      radioId: entry.id,
-      radioName: entry.name,
-      self: entry.self,
-      channel: 'PAN LONDON',
-      channelFrequency: 10,
+      applySavedLayout: true,
+      layout: {
+        x: Math.max(window.innerWidth - 360, 32),
+        y: Math.max(window.innerHeight * 0.08, 32),
+        scale: 1,
+      },
     })
-  }
+
+    dispatchRadioMessage({ changeVisibility: true, visible: true })
+    dispatchRadioMessage({ changeEditMode: true, editMode: false })
+
+    for (const entry of mockEntries) {
+      dispatchRadioMessage({
+        radioId: entry.id,
+        radioName: entry.name,
+        self: entry.self,
+        channel: 'PAN LONDON',
+        channelFrequency: 10,
+      })
+    }
+
+    dispatchRadioMessage({
+      radioId: mockEntries[0].id,
+      radioTalking: true,
+    })
+  }, 0)
 
   let talkingIndex = 0
   const interval = window.setInterval(() => {
@@ -40,13 +57,8 @@ export const startMockRadioFeed = () => {
 
     talkingIndex += 1
   }, 1400)
-
-  dispatchRadioMessage({
-    radioId: mockEntries[0].id,
-    radioTalking: true,
-  })
-
   return () => {
+    window.clearTimeout(bootstrapTimeout)
     window.clearInterval(interval)
   }
 }
