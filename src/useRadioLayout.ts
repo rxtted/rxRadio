@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { RadioLayout, RadioMessage } from './types'
 
-const VIEWPORT_INSET_RATIO = 0.0005
+const VIEWPORT_INSET_RATIO = 0.015
 const MIN_SCALE = 0.75
 const MAX_SCALE = 1.5
 

@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 
 import './index.css'
 
@@ -13,11 +13,15 @@ import { useRadioUi } from './useRadioUi'
 function App() {
   useNuiMessages()
 
+  const isDevEnvironment = import.meta.env.DEV
   const shellRef = useRef<HTMLElement | null>(null)
+  const [isDevEditMode, setIsDevEditMode] = useState(false)
   const { channel, entries, frequency, isEditMode, isVisible, memberCount } = useRadioUi()
   const { attachShell, layout, updateLayout } = useRadioLayout()
+  const isEditModeActive = isEditMode || (isDevEnvironment && isDevEditMode)
+  const isPanelVisible = isVisible || (isDevEnvironment && isDevEditMode)
   const { finishInteraction, interaction, onDrag, onResize, startDrag, startResize } = useRadioEditor({
-    isEditMode,
+    isEditMode: isEditModeActive,
     layout,
     onUpdateLayout: updateLayout,
     shellRef,
@@ -42,11 +46,27 @@ function App() {
 
   return (
     <div className="radio-app">
+      {isDevEnvironment ? (
+        <button
+          className={['radio-dev-toggle', isDevEditMode ? 'radio-dev-toggle--active' : ''].filter(Boolean).join(' ')}
+          onClick={() => {
+            setIsDevEditMode((currentState) => !currentState)
+          }}
+          type="button"
+        >
+          {isDevEditMode ? 'Exit Edit Preview' : 'Show Edit Preview'}
+        </button>
+      ) : null}
+      {isEditModeActive ? (
+        <div aria-hidden="true" className="radio-edit-overlay">
+          <div className="radio-edit-overlay__bounds" />
+        </div>
+      ) : null}
       <section
         className={[
           'radio-shell',
-          isVisible ? 'radio-shell--visible' : '',
-          isEditMode ? 'radio-shell--edit-mode' : '',
+          isPanelVisible ? 'radio-shell--visible' : '',
+          isEditModeActive ? 'radio-shell--edit-mode' : '',
           interaction !== 'idle' ? 'radio-shell--editing' : '',
         ]
           .filter(Boolean)
@@ -61,7 +81,7 @@ function App() {
         <div className="radio-panel">
           <RadioHeader channel={channel} frequency={frequency} memberCount={memberCount} />
           <RadioMemberList entries={entries} isEmpty={entries.length === 0} />
-          {isEditMode ? <RadioResizeHandles onPointerDown={startResize} /> : null}
+          {isEditModeActive ? <RadioResizeHandles onPointerDown={startResize} /> : null}
         </div>
       </section>
     </div>
