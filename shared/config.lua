@@ -50,18 +50,10 @@ Config.Notification = function(source, message, type)
 end
 
 Config.ClientNotification = function(message, notificationType)
-    if lib and lib.notify then
-        lib.notify({
-            title = "rxRadio",
-            description = message,
-            type = notificationType or "inform",
-            duration = 5000
-        })
-        return
-    end
-
-    TriggerEvent("chat:addMessage", {
-        color = notificationType == "error" and { 255, 80, 80 } or { 125, 207, 255 },
-        args = { "rxRadio", message }
+    TriggerEvent("ox_lib:notify", {
+        title = "rxRadio",
+        description = message,
+        type = notificationType or "inform",
+        duration = 5000
     })
 end
