@@ -8,6 +8,12 @@ Shared.Callback.getPlayersInRadio = ("%s:getPlayersInRadio"):format(Shared.curre
 
 Shared.Callback.getPlayerName = ("%s:getPlayerName"):format(Shared.currentResourceName)
 
+Shared.Event = {}
+
+Shared.Event.updatePlayerDisplay = ("%s:updatePlayerDisplay"):format(Shared.currentResourceName)
+
+Shared.Event.updateChannelDisplay = ("%s:updateChannelDisplay"):format(Shared.currentResourceName)
+
 Shared.State = {}
 
 Shared.State.nameInRadio = ("%s_nameInRadio"):format(Shared.currentResourceName)

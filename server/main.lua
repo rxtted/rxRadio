@@ -51,12 +51,27 @@ local function getPlayerIdentifier(source)
     return identifier
 end
 
-local function refreshRadioForPlayer(source)
-    local currentRadioChannel = Player(source).state.radioChannel
+local function getRadioChannelName(radioChannel)
+    return customRadioNames[tostring(radioChannel)] or Config.RadioChannelsWithName[tostring(radioChannel)] or Config.RadioChannelsWithName[tostring(math.floor(radioChannel))] or radioChannel
+end
+
+local function broadcastPlayerDisplayUpdate(playerId, playerName)
+    local currentRadioChannel = Player(playerId).state.radioChannel
     if not currentRadioChannel or not (currentRadioChannel > 0) then return end
-    pma_voice:setPlayerRadio(source, 0)
-    Wait(100)
-    pma_voice:setPlayerRadio(source, currentRadioChannel)
+
+    local channelName = getRadioChannelName(currentRadioChannel)
+    for target in pairs(pma_voice:getPlayersInRadioChannel(currentRadioChannel)) do
+        TriggerClientEvent(Shared.Event.updatePlayerDisplay, target, playerId, playerName, channelName, currentRadioChannel)
+    end
+end
+
+local function broadcastChannelDisplayUpdate(radioChannel)
+    if not radioChannel or not (radioChannel > 0) then return end
+
+    local channelName = getRadioChannelName(radioChannel)
+    for target in pairs(pma_voice:getPlayersInRadioChannel(radioChannel)) do
+        TriggerClientEvent(Shared.Event.updateChannelDisplay, target, channelName, radioChannel)
+    end
 end
 
 local function setPlayerName(source, newName)
@@ -64,7 +79,7 @@ local function setPlayerName(source, newName)
     if currentName and currentName == newName then return end
     customPlayerNames[getPlayerIdentifier(source)] = newName
     Player(source).state:set(Shared.State.nameInRadio, newName, true)
-    refreshRadioForPlayer(source)
+    broadcastPlayerDisplayUpdate(source, newName)
     Config.Notification(source, ("Your name on radio changed to %s"):format(newName))
 end
 
@@ -79,12 +94,8 @@ end
 
 local function resetPlayerName(source)
     Player(source).state:set(Shared.State.nameInRadio, nil, true)
-    getPlayerName(source)
-    refreshRadioForPlayer(source)
-end
-
-local function getRadioChannelName(radioChannel)
-    return customRadioNames[tostring(radioChannel)] or Config.RadioChannelsWithName[tostring(radioChannel)] or Config.RadioChannelsWithName[tostring(math.floor(radioChannel))] or radioChannel
+    local playerName = getPlayerName(source)
+    broadcastPlayerDisplayUpdate(source, playerName)
 end
 
 local function modifyPermissionToSeeRadioList(source, state)
@@ -137,8 +148,8 @@ if Config.LetPlayersChangeRadioChannelsName then
                     return Config.Notification(source, "You are not permitted to change this radio channel name!", "error")
                 end
                 customRadioNames[tostring(currentRadioChannel)] = customizedName
+                broadcastChannelDisplayUpdate(currentRadioChannel)
                 for player in pairs(pma_voice:getPlayersInRadioChannel(currentRadioChannel)) do
-                    refreshRadioForPlayer(player)
                     Config.Notification(player, ("Player %s changed the radio channel(%s)'s name to %s"):format(Player(source).state[Shared.State.nameInRadio], currentRadioChannel, customizedName))
                 end
             end

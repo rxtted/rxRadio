@@ -188,6 +188,34 @@ RegisterNetEvent("pma-voice:removePlayerFromRadio", function(playerId)
     removePlayerFromTheRadioList(playerId)
 end)
 
+RegisterNetEvent(Shared.Event.updatePlayerDisplay, function(playerId, playerName, channelName, channelFrequency)
+    if not playerId or not playerName then return end
+
+    currentRadioChannel = channelFrequency or currentRadioChannel
+    currentRadioChannelName = channelName or currentRadioChannelName
+    playersInRadio[playerId] = addServerIdToPlayerName(playerId, playerName)
+
+    SendNUIMessage({
+        self = playerId == playerServerID,
+        radioId = playerId,
+        radioName = playersInRadio[playerId],
+        channel = currentRadioChannelName,
+        channelFrequency = currentRadioChannel
+    })
+end)
+
+RegisterNetEvent(Shared.Event.updateChannelDisplay, function(channelName, channelFrequency)
+    if not channelFrequency then return end
+
+    currentRadioChannel = channelFrequency
+    currentRadioChannelName = channelName or channelFrequency
+
+    SendNUIMessage({
+        channel = currentRadioChannelName,
+        channelFrequency = currentRadioChannel
+    })
+end)
+
 RegisterNetEvent("pma-voice:syncRadioData", function()
     closeTheRadioList()
     local _playersInRadio

@@ -84,15 +84,6 @@ const reduceRadioUiState = (currentState: RadioUiState, lastMessage: RadioMessag
     }
   }
 
-  if (lastMessage.radioId === undefined || lastMessage.radioId === null) {
-    return nextState
-  }
-
-  nextState = {
-    ...nextState,
-    isPanelActive: true,
-  }
-
   if (lastMessage.channel) {
     nextState = {
       ...nextState,
@@ -110,6 +101,15 @@ const reduceRadioUiState = (currentState: RadioUiState, lastMessage: RadioMessag
       ...nextState,
       frequency: formatFrequency(lastMessage.channel),
     }
+  }
+
+  if (lastMessage.radioId === undefined || lastMessage.radioId === null) {
+    return nextState
+  }
+
+  nextState = {
+    ...nextState,
+    isPanelActive: true,
   }
 
   if (lastMessage.radioName !== undefined) {
