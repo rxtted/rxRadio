@@ -37,6 +37,16 @@ const getNextLayoutFromHandle = (
   }
 }
 
+const getCurrentShellLayout = (shellElement: HTMLElement): RadioLayout => {
+  const rect = shellElement.getBoundingClientRect()
+
+  return {
+    scale: 1,
+    x: rect.left,
+    y: rect.top,
+  }
+}
+
 export const useRadioEditor = ({
   isEditMode,
   layout,
@@ -69,12 +79,12 @@ export const useRadioEditor = ({
         return
       }
 
-      if (!layout) {
+      if (!shellRef.current) {
         return
       }
 
       event.preventDefault()
-      void postNui('finishEditMode', { layout })
+      void postNui('finishEditMode', { layout: layout ?? getCurrentShellLayout(shellRef.current) })
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -100,24 +110,27 @@ export const useRadioEditor = ({
   }
 
   const onDrag: PointerEventHandler<HTMLElement> = (event) => {
-    if (!isEditMode || !dragRef.current || dragRef.current.pointerId !== event.pointerId || !layout) {
+    if (!isEditMode || !dragRef.current || dragRef.current.pointerId !== event.pointerId || !shellRef.current) {
       return
     }
 
+    const activeLayout = layout ?? getCurrentShellLayout(shellRef.current)
+
     onUpdateLayout({
-      ...layout,
+      ...activeLayout,
       x: event.clientX - dragRef.current.offsetX,
       y: event.clientY - dragRef.current.offsetY,
     })
   }
 
   const startResize = (handle: EditHandle): PointerEventHandler<HTMLButtonElement> => (event) => {
-    if (!isEditMode || !layout || !shellRef.current || !handle || event.button !== 0) {
+    if (!isEditMode || !shellRef.current || !handle || event.button !== 0) {
       return
     }
 
     event.stopPropagation()
     const rect = shellRef.current.getBoundingClientRect()
+    const activeLayout = layout ?? getCurrentShellLayout(shellRef.current)
     const anchorMap = {
       ne: { x: rect.left, y: rect.bottom },
       nw: { x: rect.right, y: rect.bottom },
@@ -129,8 +142,8 @@ export const useRadioEditor = ({
     resizeRef.current = {
       anchorX: anchor.x,
       anchorY: anchor.y,
-      baseHeight: rect.height / layout.scale,
-      baseWidth: rect.width / layout.scale,
+      baseHeight: rect.height / activeLayout.scale,
+      baseWidth: rect.width / activeLayout.scale,
       handle,
       pointerId: event.pointerId,
     }
