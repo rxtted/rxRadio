@@ -17,10 +17,11 @@ function App() {
   const shellRef = useRef<HTMLElement | null>(null)
   const [isDevEditMode, setIsDevEditMode] = useState(false)
   const { channel, entries, frequency, isEditMode, isVisible, memberCount } = useRadioUi()
-  const { attachShell, layout, updateLayout } = useRadioLayout()
+  const { attachShell, baseScale, layout, updateLayout } = useRadioLayout()
   const isEditModeActive = isEditMode || (isDevEnvironment && isDevEditMode)
   const isPanelVisible = isVisible || (isDevEnvironment && isDevEditMode)
   const { finishInteraction, interaction, onDrag, onResize, startDrag, startResize } = useRadioEditor({
+    baseScale,
     isEditMode: isEditModeActive,
     layout,
     onUpdateLayout: updateLayout,
@@ -34,15 +35,17 @@ function App() {
     [attachShell],
   )
 
-  const shellStyle = layout
-    ? {
-        left: `${layout.x}px`,
-        right: 'auto',
-        top: `${layout.y}px`,
-        transform: `scale(${layout.scale})`,
-        transformOrigin: 'top left',
-      }
-    : undefined
+  const shellStyle = {
+    ...(layout
+      ? {
+          left: `${layout.x}px`,
+          right: 'auto',
+          top: `${layout.y}px`,
+        }
+      : undefined),
+    transform: `scale(${(layout?.scale ?? 1) * baseScale})`,
+    transformOrigin: 'top left',
+  }
 
   return (
     <div className="radio-app">

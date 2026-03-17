@@ -3,12 +3,18 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { RadioLayout, RadioMessage } from './types'
 
 const VIEWPORT_INSET_RATIO = 0.015
-const MIN_SCALE = 0.75
-const MAX_SCALE = 1.5
+const BASE_VIEWPORT_HEIGHT = 1440
+const MIN_BASE_SCALE = 0.75
+const MAX_BASE_SCALE = 1.5
+const MIN_USER_SCALE = 0.75
+const MAX_USER_SCALE = 1.5
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
 
 const getInset = () => window.innerHeight * VIEWPORT_INSET_RATIO
+export const getViewportBaseScale = () =>
+  clamp(window.innerHeight / BASE_VIEWPORT_HEIGHT, MIN_BASE_SCALE, MAX_BASE_SCALE)
+
 const getElementLayout = (element: HTMLElement): RadioLayout => {
   const rect = element.getBoundingClientRect()
 
@@ -26,21 +32,22 @@ export const useRadioLayout = () => {
 
   const clampLayout = useCallback(
     (nextLayout: RadioLayout, element: HTMLElement | null = attachedElementRef.current) => {
-      const boundedScale = clamp(nextLayout.scale, MIN_SCALE, MAX_SCALE)
+      const boundedUserScale = clamp(nextLayout.scale, MIN_USER_SCALE, MAX_USER_SCALE)
+      const effectiveScale = getViewportBaseScale() * boundedUserScale
 
       if (!element) {
         return {
           ...nextLayout,
-          scale: boundedScale,
+          scale: boundedUserScale,
         }
       }
 
       const inset = getInset()
-      const width = element.offsetWidth * boundedScale
-      const height = element.offsetHeight * boundedScale
+      const width = element.offsetWidth * effectiveScale
+      const height = element.offsetHeight * effectiveScale
 
       return {
-        scale: boundedScale,
+        scale: boundedUserScale,
         x: clamp(nextLayout.x, inset, Math.max(inset, window.innerWidth - width - inset)),
         y: clamp(nextLayout.y, inset, Math.max(inset, window.innerHeight - height - inset)),
       }
@@ -128,6 +135,7 @@ export const useRadioLayout = () => {
 
   return {
     attachShell,
+    baseScale: getViewportBaseScale(),
     layout,
     updateLayout,
   }

@@ -48,11 +48,13 @@ const getCurrentShellLayout = (shellElement: HTMLElement): RadioLayout => {
 }
 
 export const useRadioEditor = ({
+  baseScale,
   isEditMode,
   layout,
   onUpdateLayout,
   shellRef,
 }: {
+  baseScale: number
   isEditMode: boolean
   layout: RadioLayout | null
   onUpdateLayout: (layout: RadioLayout | ((currentLayout: RadioLayout) => RadioLayout)) => void
@@ -138,12 +140,13 @@ export const useRadioEditor = ({
       sw: { x: rect.right, y: rect.top },
     }
     const anchor = anchorMap[handle]
+    const effectiveScale = activeLayout.scale * baseScale
 
     resizeRef.current = {
       anchorX: anchor.x,
       anchorY: anchor.y,
-      baseHeight: rect.height / activeLayout.scale,
-      baseWidth: rect.width / activeLayout.scale,
+      baseHeight: rect.height / effectiveScale,
+      baseWidth: rect.width / effectiveScale,
       handle,
       pointerId: event.pointerId,
     }
