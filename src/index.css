@@ -261,9 +261,11 @@ body {
 }
 
 .radio-entry {
-  display: inline-flex;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
   width: fit-content;
-  min-height: 1.7rem;
+  height: 1.7rem;
   align-items: center;
   gap: 0.42rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -279,26 +281,31 @@ body {
   display: inline-flex;
   min-width: 0;
   flex: 1;
-  height: 100%;
+  height: 1.7rem;
   align-items: center;
+  align-self: center;
   line-height: 1;
 }
 
 .radio-entry__name {
   display: inline-flex;
-  height: 100%;
+  height: 1.7rem;
   align-items: center;
+  align-self: center;
   overflow: hidden;
   font-weight: 600;
   letter-spacing: 0.01rem;
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transform: translateY(-0.01rem);
 }
 
 .radio-entry__self-tag {
   display: inline-flex;
+  height: 1.02rem;
   align-items: center;
+  align-self: center;
   justify-content: center;
   border-radius: 999px;
   background: rgba(31, 111, 235, 0.18);
@@ -322,6 +329,8 @@ body {
   box-shadow: inset 0 0 0.2rem rgba(255, 255, 255, 0.08);
   animation: idle-pulse 2.5s ease-in-out infinite;
   align-self: center;
+  line-height: 1;
+  transform: translateY(-0.01rem);
 }
 
 .radio-entry--self {
