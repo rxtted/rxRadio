@@ -1,16 +1,18 @@
 # rxRadio
 
-`rxRadio` is a FiveM radio list resource built around `pma-voice`. It shows the current radio channel roster, highlights active speakers, supports custom radio display names, and ships with a rebuilt React + TypeScript NUI for this fork.
+rxRadio is a modernized fork of x-radiolist for FiveM servers using pma-voice. It's a fully standalone resource that provides a live radio member list, active speaker indicators, custom radio display names, and a fully rebuilt React + TypeScript NUI with editable, persistent HUD positioning alongside a complete rewrite of several key functions to improve performance & stability.
 
 This resource is a fork of `x-radiolist`.
+
+![](/public/demo1.gif)
 
 ## Features
 
 - Live radio member list driven by `pma-voice`
 - Active speaking indicator for radio users
-- Channel header with frequency, channel name, and online count
-- React + TypeScript NUI with Vite build pipeline
+- Beautified channel header with frequency, channel name, and online count
 - Player-editable radio HUD position and scale
+- Robust adaptive scaling defaults, ensuring compatibility with all resolutions
 - Client-local layout persistence for the radio HUD
 - `/callsign` support for custom player radio names
 - Optional RP-name support through ESX or QBCore
@@ -24,8 +26,8 @@ This resource is a fork of `x-radiolist`.
 
 Start these before `rxRadio`:
 
-- `ox_lib`
-- `pma-voice`
+- [ox_lib](https://github.com/CommunityOx/ox_lib)
+- [pma-voice](https://github.com/AvarianKnight/pma-voice)
 
 ## Installation
 
@@ -59,29 +61,8 @@ Default commands from the current config:
 
 Edit mode finishes through the configured keybind:
 
-- `RETURN`
-
-
-## UI Notes
-
-The current NUI stack is built from:
-
-- React
-- TypeScript
-- Vite
-
-Runtime behavior:
-
-- FiveM loads the built UI from `web/dist`
-- the default HUD position is top-right anchored
-- players can reposition and resize the HUD in edit mode
-- saved layout data is stored locally per client with resource KVPs
-
-Frontend development:
-
-- run `bun run dev` for the Vite dev server
-- run `bun run build` to rebuild the FiveM UI bundle into `web/dist`
-- run `bun run lint` to lint the frontend
+- `RETURN` Saves edited position & size
+- `ESC` Discards edited position & size restoring the configured defaults.
 
 ## Developing From Source
 
@@ -106,6 +87,8 @@ Available scripts
   Builds the frontend and creates a drag-and-drop release zip using [scripts/create-release.sh](/mnt/d/projects/fivem/rotten-development/rxradio/scripts/create-release.sh).
 
 ## Framework Notes
+
+Although by default rxRadio is a standalone resource
 
 When `Config.UseRPName` is enabled:
 
