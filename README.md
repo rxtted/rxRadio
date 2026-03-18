@@ -19,7 +19,6 @@ This resource is a fork of `x-radiolist`.
 - Configurable named radio channels
 - Optional access restriction by job/gang/group
 - `ox_lib` notifications for UI/name/channel actions
-- Debug-only mock radio entry command when enabled in config
 
 ## Dependencies
 
@@ -30,7 +29,7 @@ Start these before `rxRadio`:
 
 ## Installation
 
-1. Download a release or clone the repository.
+1. Download a f or clone the repository.
 2. Place the resource in your server resources folder as `rxRadio`.
 3. Ensure dependencies start before it.
 4. Add `ensure rxRadio` to your server config.
@@ -62,37 +61,6 @@ Edit mode finishes through the configured keybind:
 
 - `RETURN`
 
-## Debug Commands
-
-When `Config.Debug.Enabled` is `true`, the resource also exposes:
-
-- `/rx-radiomock [count]`
-  Adds local mock radio entries for UI testing using randomized `AW / ON / XN / INT` callsigns in the `2xx` range.
-
-## Configuration
-
-Primary configuration lives in [shared/config.lua](/mnt/d/projects/fivem/rotten-development/rxradio/shared/config.lua).
-
-Important current defaults:
-
-- `Config.UseRPName = false`
-- `Config.RadioListVisibilityCommand = "radiodisplay"`
-- `Config.RadioListEditCommand = "radiodisplayedit"`
-- `Config.RadioListEditConfirmKeybind = "RETURN"`
-- `Config.RadioListResetCommand = "radiodisplayreset"`
-- `Config.RadioListChangeNameCommand = "callsign"`
-- `Config.LetPlayersChangeRadioChannelsName = false`
-- `Config.ShowPlayersServerIdNextToTheirName = true`
-- `Config.PlayerServerIdPosition = "right"`
-- `Config.RadioListOnlyShowsToGroupsWithAccess = false`
-- `Config.Debug.Enabled = true`
-- `Config.Debug.MockRadioEntriesCommand = "rx-radiomock"`
-
-Named channel defaults:
-
-- `10 = PAN LONDON`
-- `2 = FIRE`
-- `3 = CIVILIAN`
 
 ## UI Notes
 
@@ -117,14 +85,14 @@ Frontend development:
 
 ## Developing From Source
 
-If you are working on the resource itself instead of using a packaged release:
+If you are working from source:
 
 1. Install [Bun](https://bun.sh/).
 2. Open the repository root.
 3. Install dependencies with `bun install`.
 4. Use the scripts below depending on whether you are developing, validating, or packaging.
 
-Available scripts from [package.json](/mnt/d/projects/fivem/rotten-development/rxradio/package.json):
+Available scripts
 
 - `bun run dev`
   Starts the Vite dev server for working on the React NUI in a browser.
@@ -135,7 +103,7 @@ Available scripts from [package.json](/mnt/d/projects/fivem/rotten-development/r
 - `bun run preview`
   Serves the built frontend locally for previewing the production bundle.
 - `bun run packaging -- <version>`
-  Builds the frontend and creates a drag-and-drop package zip using [scripts/create-packaging.sh](/mnt/d/projects/fivem/rotten-development/rxradio/scripts/create-packaging.sh).
+  Builds the frontend and creates a drag-and-drop release zip using [scripts/create-release.sh](/mnt/d/projects/fivem/rotten-development/rxradio/scripts/create-release.sh).
 
 Typical source workflow:
 
@@ -150,17 +118,11 @@ When you want to test the resource in FiveM with the latest frontend bundle:
 bun run build
 ```
 
-When you want a packaged archive:
+When you want a packaged resource:
 
 ```bash
 bun run packaging -- v0.1.0
 ```
-
-That packaging script:
-
-- rebuilds the frontend
-- packages `client`, `module`, `server`, `shared`, `web`, `fxmanifest.lua`, `README.md`, and `LICENSE`
-- outputs `release/rxRadio-<version>.zip`
 
 ## Framework Notes
 
