@@ -31,7 +31,7 @@ Start these before `rxRadio`:
 
 ## Installation
 
-1. Download a release from the right hand side.
+1. Download a [release](https://github.com/rxtted/rxRadio/releases/tag/release) from the right hand side.
 2. Place the resource in your server resources folder as `rxRadio`.
 3. Ensure dependencies start before it.
 4. Add `ensure rxRadio` to your server config.
