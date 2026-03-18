@@ -44,7 +44,7 @@ function App() {
         }
       : undefined),
     transform: `scale(${(layout?.scale ?? 1) * baseScale})`,
-    transformOrigin: 'top left',
+    transformOrigin: layout ? 'top left' : 'top right',
   }
 
   return (

@@ -102,7 +102,6 @@ body {
   display: none;
   min-width: 17rem;
   width: fit-content;
-  animation: panel-in 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 3;
 }
 
@@ -123,6 +122,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
+}
+
+.radio-shell--visible .radio-panel {
+  animation: panel-in 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .radio-shell--edit-mode .radio-panel {
@@ -386,12 +389,12 @@ body {
 @keyframes panel-in {
   from {
     opacity: 0;
-    transform: translateY(20px) scale(0.96);
+    transform: translateY(0.35rem);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
