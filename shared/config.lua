@@ -16,7 +16,7 @@ Config.RadioListEditModeCancelledMessage = "Radio list edit mode cancelled."
 Config.RadioListResetMessage = "Radio list layout reset to the default profile."
 
 Config.Debug = {
-    Enabled = true,                                -- Enables debug-only commands and suggestions
+    Enabled = false,                                -- Enables debug-only commands and suggestions
     MockRadioEntriesCommand = "rx-radiomock",  -- Adds local mock radio entries for UI testing
 }
 
@@ -44,7 +44,7 @@ Config.JobsWithCallsign = {
 Config.LetPlayersOverrideRadioChannelsWithName = false
 
 Config.RadioChannelsWithName = {
-    ["10"] = "PAN LONDON",
+    ["1"] = "POLICE",
     ["2"] = "FIRE",
     ["3"] = "CIVILIAN",
 }
