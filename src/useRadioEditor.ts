@@ -15,7 +15,47 @@ type ResizeState = {
   baseHeight: number
   baseWidth: number
   handle: Exclude<EditHandle, null>
+  initialDistance: number
+  initialScale: number
   pointerId: number
+}
+
+const VIEWPORT_INSET_RATIO = 0.015
+const MIN_USER_SCALE = 0.75
+const MAX_USER_SCALE = 1.5
+
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+const getInset = () => window.innerHeight * VIEWPORT_INSET_RATIO
+
+const getMaxScaleForHandle = (
+  handle: Exclude<EditHandle, null>,
+  anchorX: number,
+  anchorY: number,
+  baseWidth: number,
+  baseHeight: number,
+  baseScale: number,
+) => {
+  const inset = getInset()
+
+  switch (handle) {
+    case 'nw':
+      return Math.min((anchorX - inset) / (baseWidth * baseScale), (anchorY - inset) / (baseHeight * baseScale))
+    case 'ne':
+      return Math.min(
+        (window.innerWidth - inset - anchorX) / (baseWidth * baseScale),
+        (anchorY - inset) / (baseHeight * baseScale),
+      )
+    case 'sw':
+      return Math.min(
+        (anchorX - inset) / (baseWidth * baseScale),
+        (window.innerHeight - inset - anchorY) / (baseHeight * baseScale),
+      )
+    case 'se':
+      return Math.min(
+        (window.innerWidth - inset - anchorX) / (baseWidth * baseScale),
+        (window.innerHeight - inset - anchorY) / (baseHeight * baseScale),
+      )
+  }
 }
 
 const getNextLayoutFromHandle = (
@@ -62,7 +102,30 @@ export const useRadioEditor = ({
 }) => {
   const dragRef = useRef<DragState | null>(null)
   const resizeRef = useRef<ResizeState | null>(null)
+  const frameRef = useRef<number | null>(null)
+  const pendingLayoutRef = useRef<RadioLayout | null>(null)
   const [interaction, setInteraction] = useState<EditInteraction>('idle')
+
+  const flushPendingLayout = () => {
+    frameRef.current = null
+
+    if (!pendingLayoutRef.current) {
+      return
+    }
+
+    onUpdateLayout(pendingLayoutRef.current)
+    pendingLayoutRef.current = null
+  }
+
+  const queueLayoutUpdate = (nextLayout: RadioLayout) => {
+    pendingLayoutRef.current = nextLayout
+
+    if (frameRef.current !== null) {
+      return
+    }
+
+    frameRef.current = window.requestAnimationFrame(flushPendingLayout)
+  }
 
   useEffect(() => {
     if (!isEditMode) {
@@ -96,6 +159,14 @@ export const useRadioEditor = ({
     }
   }, [isEditMode, layout, shellRef])
 
+  useEffect(() => {
+    return () => {
+      if (frameRef.current !== null) {
+        window.cancelAnimationFrame(frameRef.current)
+      }
+    }
+  }, [])
+
   const startDrag: PointerEventHandler<HTMLElement> = (event) => {
     if (!isEditMode || event.button !== 0 || !shellRef.current) {
       return
@@ -118,7 +189,7 @@ export const useRadioEditor = ({
 
     const activeLayout = layout ?? getCurrentShellLayout(shellRef.current)
 
-    onUpdateLayout({
+    queueLayoutUpdate({
       ...activeLayout,
       x: event.clientX - dragRef.current.offsetX,
       y: event.clientY - dragRef.current.offsetY,
@@ -141,6 +212,7 @@ export const useRadioEditor = ({
     }
     const anchor = anchorMap[handle]
     const effectiveScale = activeLayout.scale * baseScale
+    const initialDistance = Math.max(1, Math.hypot(event.clientX - anchor.x, event.clientY - anchor.y))
 
     resizeRef.current = {
       anchorX: anchor.x,
@@ -148,6 +220,8 @@ export const useRadioEditor = ({
       baseHeight: rect.height / effectiveScale,
       baseWidth: rect.width / effectiveScale,
       handle,
+      initialDistance,
+      initialScale: activeLayout.scale,
       pointerId: event.pointerId,
     }
     shellRef.current.setPointerCapture(event.pointerId)
@@ -163,11 +237,19 @@ export const useRadioEditor = ({
       return
     }
 
-    const dx = Math.abs(event.clientX - resizeRef.current.anchorX)
-    const dy = Math.abs(event.clientY - resizeRef.current.anchorY)
-    const scale = Math.max(dx / resizeRef.current.baseWidth, dy / resizeRef.current.baseHeight, 0.75)
-    const width = resizeRef.current.baseWidth * scale
-    const height = resizeRef.current.baseHeight * scale
+    const distance = Math.max(1, Math.hypot(event.clientX - resizeRef.current.anchorX, event.clientY - resizeRef.current.anchorY))
+    const pointerScale = resizeRef.current.initialScale * (distance / resizeRef.current.initialDistance)
+    const maxScaleForHandle = getMaxScaleForHandle(
+      resizeRef.current.handle,
+      resizeRef.current.anchorX,
+      resizeRef.current.anchorY,
+      resizeRef.current.baseWidth,
+      resizeRef.current.baseHeight,
+      baseScale,
+    )
+    const scale = clamp(pointerScale, MIN_USER_SCALE, Math.min(MAX_USER_SCALE, maxScaleForHandle))
+    const width = resizeRef.current.baseWidth * baseScale * scale
+    const height = resizeRef.current.baseHeight * baseScale * scale
     const nextPosition = getNextLayoutFromHandle(
       resizeRef.current.anchorX,
       resizeRef.current.anchorY,
@@ -176,7 +258,7 @@ export const useRadioEditor = ({
       resizeRef.current.handle,
     )
 
-    onUpdateLayout({
+    queueLayoutUpdate({
       scale,
       x: nextPosition.x,
       y: nextPosition.y,
