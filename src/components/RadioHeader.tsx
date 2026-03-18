@@ -12,7 +12,6 @@ export function RadioHeader({
   return (
     <header className="badge-header">
       <div className="badge-header__frequency">
-        <span className="badge-header__frequency-label">freq</span>
         <strong id="radio-frequency">{frequency}</strong>
       </div>
       <div className="badge-header__text">
