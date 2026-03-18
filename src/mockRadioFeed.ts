@@ -61,16 +61,33 @@ const buildAdditionalMockEntries = (count: number): MockEntry[] => {
     }),
   )
   const availableTemplates = buildMockEntryTemplates().filter((template) => !usedTemplateKeys.has(template.key))
+  const availableCommandTemplates = availableTemplates.filter((template) => template.key.startsWith('command:'))
   const additionalEntries: MockEntry[] = []
+  const selectedTemplates: MockEntryTemplate[] = []
+  const baseCommandCount = baseMockEntries.filter((entry) => /-[7]\d \| 17\dBX$/.test(entry.name)).length
+  const requiredCommandCount = Math.min(Math.max(0, 5 - baseCommandCount), count, availableCommandTemplates.length)
   let prefixIndex = 0
-  let templateIndex = 0
+
+  for (let index = 0; index < requiredCommandCount; index += 1) {
+    const template = availableCommandTemplates[index]
+    selectedTemplates.push(template)
+    const availableTemplateIndex = availableTemplates.findIndex((availableTemplate) => availableTemplate.key === template.key)
+
+    if (availableTemplateIndex >= 0) {
+      availableTemplates.splice(availableTemplateIndex, 1)
+    }
+  }
+
+  while (selectedTemplates.length < count && availableTemplates.length > 0) {
+    selectedTemplates.push(availableTemplates.shift()!)
+  }
 
   for (let id = 10; id <= 200 && additionalEntries.length < count; id += 1) {
-    if (usedIds.has(id) || templateIndex >= availableTemplates.length) {
+    if (usedIds.has(id) || additionalEntries.length >= selectedTemplates.length) {
       continue
     }
 
-    const template = availableTemplates[templateIndex]
+    const template = selectedTemplates[additionalEntries.length]
     additionalEntries.push({
       id,
       name: template.buildName(callsignPrefixes[prefixIndex % callsignPrefixes.length]),
@@ -79,7 +96,6 @@ const buildAdditionalMockEntries = (count: number): MockEntry[] => {
 
     usedIds.add(id)
     prefixIndex += 1
-    templateIndex += 1
   }
 
   return additionalEntries

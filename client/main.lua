@@ -121,6 +121,18 @@ local function getUsedDebugMockEntryKeys()
     return usedEntryKeys
 end
 
+local function countExistingDebugCommandEntries()
+    local commandEntryCount = 0
+
+    for _, playerName in pairs(playersInRadio) do
+        if type(playerName) == "string" and playerName:match("^[A-Z]+%-7%d | 17%dBX$") then
+            commandEntryCount += 1
+        end
+    end
+
+    return commandEntryCount
+end
+
 local function buildDebugMockEntryPool()
     local entryPool = {}
 
@@ -173,11 +185,15 @@ local function addDebugMockEntries(count)
 
     local usedEntryKeys = getUsedDebugMockEntryKeys()
     local callsignPrefixes = { "AW", "ON", "XN", "INT" }
-    local availableEntries = {}
+    local availableEntries, availableCommandEntries = {}, {}
 
     for _, entry in ipairs(buildDebugMockEntryPool()) do
         if not usedEntryKeys[entry.key] then
             availableEntries[#availableEntries + 1] = entry
+
+            if entry.key:sub(1, 8) == "command:" then
+                availableCommandEntries[#availableCommandEntries + 1] = entry
+            end
         end
     end
 
@@ -189,21 +205,47 @@ local function addDebugMockEntries(count)
     end
 
     local availableEntryCount = math.min(#availableEntries, availableIdCount)
+    local existingCommandEntryCount = countExistingDebugCommandEntries()
+    local requiredCommandEntryCount = math.min(math.max(0, 5 - existingCommandEntryCount), count)
 
     if count > availableEntryCount then
         notifyEditMode(("Only %s unique mock entries are available right now."):format(availableEntryCount), "error")
         return
     end
 
-    for index = 1, count do
+    if requiredCommandEntryCount > #availableCommandEntries then
+        notifyEditMode(("Only %s command mock entr%s are available right now."):format(#availableCommandEntries, #availableCommandEntries == 1 and "y" or "ies"), "error")
+        return
+    end
+
+    local selectedEntries = {}
+
+    for _ = 1, requiredCommandEntryCount do
+        local randomIndex = math.random(1, #availableCommandEntries)
+        local commandEntry = table.remove(availableCommandEntries, randomIndex)
+
+        for entryIndex, entry in ipairs(availableEntries) do
+            if entry.key == commandEntry.key then
+                table.remove(availableEntries, entryIndex)
+                break
+            end
+        end
+
+        selectedEntries[#selectedEntries + 1] = commandEntry
+    end
+
+    while #selectedEntries < count do
         local randomIndex = math.random(1, #availableEntries)
         local entry = table.remove(availableEntries, randomIndex)
+        selectedEntries[#selectedEntries + 1] = entry
+    end
+
+    for _, entry in ipairs(selectedEntries) do
         local debugRadioId = getNextDebugMockRadioId()
         local prefix = callsignPrefixes[math.random(1, #callsignPrefixes)]
-        local debugName = entry.buildName(prefix)
 
         if not debugRadioId then break end
-        addPlayerToTheRadioList(debugRadioId, debugName)
+        addPlayerToTheRadioList(debugRadioId, entry.buildName(prefix))
     end
 
     notifyEditMode(("Added %s mock radio entr%s."):format(count, count == 1 and "y" or "ies"))

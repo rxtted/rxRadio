@@ -354,38 +354,120 @@ body {
 
 .radio-resize-handle {
   position: absolute;
-  width: 0.72rem;
-  height: 0.72rem;
-  border: 1px solid rgba(125, 207, 255, 0.35);
-  background: rgba(10, 18, 26, 0.92);
-  box-shadow:
-    0 0 0.35rem rgba(31, 111, 235, 0.18),
-    inset 0 0 0.15rem rgba(255, 255, 255, 0.08);
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 0;
+  background: transparent;
+  padding: 0;
   z-index: 4;
 }
 
 .radio-resize-handle--nw {
-  top: -0.46rem;
-  left: -0.46rem;
+  top: -0.7rem;
+  left: -0.7rem;
   cursor: nwse-resize;
 }
 
 .radio-resize-handle--ne {
-  top: -0.46rem;
-  right: -0.46rem;
+  top: -0.7rem;
+  right: -0.7rem;
   cursor: nesw-resize;
 }
 
 .radio-resize-handle--sw {
-  bottom: -0.46rem;
-  left: -0.46rem;
+  bottom: -0.7rem;
+  left: -0.7rem;
   cursor: nesw-resize;
 }
 
 .radio-resize-handle--se {
-  right: -0.46rem;
-  bottom: -0.46rem;
+  right: -0.7rem;
+  bottom: -0.7rem;
   cursor: nwse-resize;
+}
+
+.radio-resize-handle::before,
+.radio-resize-handle::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.radio-resize-handle::before {
+  width: 0.72rem;
+  height: 0.72rem;
+  border-color: rgba(125, 207, 255, 0.56);
+  filter: drop-shadow(0 0 0.35rem rgba(31, 111, 235, 0.26));
+}
+
+.radio-resize-handle::after {
+  width: 0.18rem;
+  height: 0.18rem;
+  border-radius: 50%;
+  background: rgba(125, 207, 255, 0.9);
+  box-shadow: 0 0 0.35rem rgba(125, 207, 255, 0.45);
+}
+
+.radio-resize-handle--nw::before {
+  top: 0.18rem;
+  left: 0.18rem;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.radio-resize-handle--nw::after {
+  top: 0.18rem;
+  left: 0.18rem;
+}
+
+.radio-resize-handle--ne::before {
+  top: 0.18rem;
+  right: 0.18rem;
+  border-top: 2px solid;
+  border-right: 2px solid;
+}
+
+.radio-resize-handle--ne::after {
+  top: 0.18rem;
+  right: 0.18rem;
+}
+
+.radio-resize-handle--sw::before {
+  bottom: 0.18rem;
+  left: 0.18rem;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+}
+
+.radio-resize-handle--sw::after {
+  bottom: 0.18rem;
+  left: 0.18rem;
+}
+
+.radio-resize-handle--se::before {
+  right: 0.18rem;
+  bottom: 0.18rem;
+  border-right: 2px solid;
+  border-bottom: 2px solid;
+}
+
+.radio-resize-handle--se::after {
+  right: 0.18rem;
+  bottom: 0.18rem;
+}
+
+.radio-resize-handle:hover::before,
+.radio-resize-handle:focus-visible::before {
+  border-color: rgba(125, 207, 255, 0.84);
+}
+
+.radio-resize-handle:hover::after,
+.radio-resize-handle:focus-visible::after {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.radio-resize-handle:focus-visible {
+  outline: none;
 }
 
 @keyframes panel-in {
