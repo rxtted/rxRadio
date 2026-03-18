@@ -5,8 +5,8 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 VERSION="${1:-}"
 
 if [[ -z "${VERSION}" ]]; then
-  echo "Usage: bun run release -- <version>"
-  echo "Example: bun run release -- v0.1.0"
+  echo "Usage: bun run packaging -- <version>"
+  echo "Example: bun run packaging -- v0.1.0"
   exit 1
 fi
 
