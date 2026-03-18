@@ -105,25 +105,6 @@ Available scripts
 - `bun run packaging -- <version>`
   Builds the frontend and creates a drag-and-drop release zip using [scripts/create-release.sh](/mnt/d/projects/fivem/rotten-development/rxradio/scripts/create-release.sh).
 
-Typical source workflow:
-
-```bash
-bun install
-bun run dev
-```
-
-When you want to test the resource in FiveM with the latest frontend bundle:
-
-```bash
-bun run build
-```
-
-When you want a packaged resource:
-
-```bash
-bun run packaging -- v0.1.0
-```
-
 ## Framework Notes
 
 When `Config.UseRPName` is enabled:
