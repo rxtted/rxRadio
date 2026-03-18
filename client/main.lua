@@ -101,19 +101,52 @@ local function removePlayerFromTheRadioList(playerId)
     SendNUIMessage({ radioId = playerId })
 end
 
-local function getUsedDebugMockSuffixes()
-    local usedSuffixes = {}
+local function getUsedDebugMockEntryKeys()
+    local usedEntryKeys = {}
 
     for _, playerName in pairs(playersInRadio) do
         if type(playerName) == "string" then
-            local suffix = playerName:match("^[A-Z]+%-(2%d%d)")
-            if suffix then
-                usedSuffixes[suffix] = true
+            local standardSuffix = playerName:match("^[A-Z]+%-(2%d%d)$")
+            if standardSuffix then
+                usedEntryKeys["standard:"..standardSuffix] = true
+            end
+
+            local commandDigit = playerName:match("^[A-Z]+%-7(%d) | 17%dBX$")
+            if commandDigit then
+                usedEntryKeys["command:"..commandDigit] = true
             end
         end
     end
 
-    return usedSuffixes
+    return usedEntryKeys
+end
+
+local function buildDebugMockEntryPool()
+    local entryPool = {}
+
+    for tens = 0, 9 do
+        for ones = 0, 9 do
+            local suffix = ("2%s%s"):format(tens, ones)
+            entryPool[#entryPool + 1] = {
+                key = "standard:"..suffix,
+                buildName = function(prefix)
+                    return ("%s-%s"):format(prefix, suffix)
+                end
+            }
+        end
+    end
+
+    for digit = 0, 9 do
+        local commandDigit = tostring(digit)
+        entryPool[#entryPool + 1] = {
+            key = "command:"..commandDigit,
+            buildName = function(prefix)
+                return ("%s-7%s | 17%sBX"):format(prefix, commandDigit, commandDigit)
+            end
+        }
+    end
+
+    return entryPool
 end
 
 local function getNextDebugMockRadioId()
@@ -138,15 +171,13 @@ local function addDebugMockEntries(count)
         return
     end
 
-    local usedSuffixes = getUsedDebugMockSuffixes()
-    local availableSuffixes, callsignPrefixes = {}, { "AW", "ON", "XN", "INT" }
+    local usedEntryKeys = getUsedDebugMockEntryKeys()
+    local callsignPrefixes = { "AW", "ON", "XN", "INT" }
+    local availableEntries = {}
 
-    for tens = 0, 9 do
-        for ones = 0, 9 do
-            local suffix = ("2%s%s"):format(tens, ones)
-            if not usedSuffixes[suffix] then
-                availableSuffixes[#availableSuffixes + 1] = suffix
-            end
+    for _, entry in ipairs(buildDebugMockEntryPool()) do
+        if not usedEntryKeys[entry.key] then
+            availableEntries[#availableEntries + 1] = entry
         end
     end
 
@@ -157,7 +188,7 @@ local function addDebugMockEntries(count)
         end
     end
 
-    local availableEntryCount = math.min(#availableSuffixes, availableIdCount)
+    local availableEntryCount = math.min(#availableEntries, availableIdCount)
 
     if count > availableEntryCount then
         notifyEditMode(("Only %s unique mock entries are available right now."):format(availableEntryCount), "error")
@@ -165,11 +196,11 @@ local function addDebugMockEntries(count)
     end
 
     for index = 1, count do
-        local randomIndex = math.random(1, #availableSuffixes)
-        local suffix = table.remove(availableSuffixes, randomIndex)
+        local randomIndex = math.random(1, #availableEntries)
+        local entry = table.remove(availableEntries, randomIndex)
         local debugRadioId = getNextDebugMockRadioId()
         local prefix = callsignPrefixes[math.random(1, #callsignPrefixes)]
-        local debugName = ("%s-%s"):format(prefix, suffix)
+        local debugName = entry.buildName(prefix)
 
         if not debugRadioId then break end
         addPlayerToTheRadioList(debugRadioId, debugName)
