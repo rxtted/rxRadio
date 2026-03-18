@@ -140,11 +140,17 @@ export const useRadioEditor = ({
     }
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Enter' && event.code !== 'Enter' && event.code !== 'NumpadEnter') {
+      if (!shellRef.current) {
         return
       }
 
-      if (!shellRef.current) {
+      if (event.key === 'Escape' || event.code === 'Escape') {
+        event.preventDefault()
+        void postNui('cancelEditMode')
+        return
+      }
+
+      if (event.key !== 'Enter' && event.code !== 'Enter' && event.code !== 'NumpadEnter') {
         return
       }
 

@@ -6,12 +6,13 @@ Config.LetPlayersChangeVisibilityOfRadioList = true     -- Let players to toggle
 Config.RadioListVisibilityCommand = "radiodisplay"      -- Only works if Config.LetPlayersChangeVisibilityOfRadioList is set to true
 Config.HideRadioListVisibilityByDefault = false         -- If set to true and a player joins the server, don't show the radio list until the player execute the Config.RadioListVisibilityCommand command
 Config.RadioListEditCommand = "radiodisplayedit"        -- Lets players edit the radio list on screen
-Config.RadioListEditConfirmCommand = "+radiodisplayeditconfirm"
 Config.RadioListEditConfirmKeybind = "RETURN"
+Config.RadioListEditCancelKeybind = "ESCAPE"
 Config.RadioListResetCommand = "radiodisplayreset"
-Config.RadioListEditModeEnabledMessage = "You can now edit the radio list. Drag or resize it and press [%s] to finish."
+Config.RadioListEditModeEnabledMessage = "You can now edit the radio list. Drag or resize it and press [%s] to save or [%s] to cancel."
 Config.RadioListEditModeDisabledMessage = "Radio list edit mode disabled."
 Config.RadioListEditModeSavedMessage = "Radio list layout saved."
+Config.RadioListEditModeCancelledMessage = "Radio list edit mode cancelled."
 Config.RadioListResetMessage = "Radio list layout reset to the default profile."
 
 Config.Debug = {

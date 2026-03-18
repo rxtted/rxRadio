@@ -40,6 +40,17 @@ local function resetRadioLayout()
     SendNUIMessage({ resetSavedLayout = true })
 end
 
+local function restoreSavedRadioLayout()
+    local savedLayout = loadSavedRadioLayout()
+
+    if savedLayout then
+        SendNUIMessage({ applySavedLayout = true, layout = savedLayout })
+        return
+    end
+
+    SendNUIMessage({ resetSavedLayout = true })
+end
+
 local function closeTheRadioList()
     playersInRadio, currentRadioChannel, currentRadioChannelName = {}, nil, nil
     SendNUIMessage({ clearRadioList = true })
@@ -67,6 +78,16 @@ RegisterNUICallback("finishEditMode", function(data, cb)
         saveRadioLayout(data and data.layout)
         setRadioListEditMode(false)
         notifyEditMode(Config.RadioListEditModeSavedMessage)
+    end
+
+    cb({})
+end)
+
+RegisterNUICallback("cancelEditMode", function(_, cb)
+    if radioListEditMode then
+        restoreSavedRadioLayout()
+        setRadioListEditMode(false)
+        notifyEditMode(Config.RadioListEditModeCancelledMessage)
     end
 
     cb({})
@@ -339,16 +360,10 @@ RegisterCommand(Config.RadioListEditCommand, function()
     setRadioListEditMode(not radioListEditMode)
 
     if radioListEditMode then
-        notifyEditMode(Config.RadioListEditModeEnabledMessage:format(Config.RadioListEditConfirmKeybind))
+        notifyEditMode(Config.RadioListEditModeEnabledMessage:format(Config.RadioListEditConfirmKeybind, Config.RadioListEditCancelKeybind))
     else
         notifyEditMode(Config.RadioListEditModeDisabledMessage)
     end
-end, false)
-
-RegisterCommand(Config.RadioListEditConfirmCommand, function()
-    if not radioListEditMode then return end
-    setRadioListEditMode(false)
-    notifyEditMode(Config.RadioListEditModeSavedMessage)
 end, false)
 
 RegisterCommand(Config.RadioListResetCommand, function()
@@ -359,8 +374,6 @@ RegisterCommand(Config.RadioListResetCommand, function()
     resetRadioLayout()
     notifyEditMode(Config.RadioListResetMessage)
 end, false)
-
-RegisterKeyMapping(Config.RadioListEditConfirmCommand, "Finish editing the radio list", "keyboard", Config.RadioListEditConfirmKeybind)
 TriggerEvent("chat:addSuggestion", "/"..Config.RadioListEditCommand, "Edit the radio list on screen")
 TriggerEvent("chat:addSuggestion", "/"..Config.RadioListResetCommand, "Reset the radio list layout to the default profile")
 
